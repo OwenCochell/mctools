@@ -101,12 +101,11 @@ setup(
 
         # Stating that we are platform independent:
 
-        'Operating System :: OS Independent'
+        'Operating System :: OS Independent',
 
         # Specify the Python versions you support here. In particular, ensure
         # that you indicate you support Python 3. These classifiers are *not*
         # checked by 'pip install'. See instead 'python_requires' below.
-        'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
         'Programming Language :: Python :: 3.8',
@@ -119,7 +118,7 @@ setup(
     # Note that this is a list of additional keywords, separated
     # by commas, to be used to assist searching for the distribution in a
     # larger catalog.
-    keywords='Minecraft, minecraft, rcon, query, ping, server list ping',  # Optional
+    keywords='minecraft, rcon, query, ping, server list ping',  # Optional
 
     # When your source code is in a subdirectory under the project root, e.g.
     # `src/`, it is necessary to specify the `package_dir` argument.
@@ -134,7 +133,7 @@ setup(
     #
     #   py_modules=["my_module"],
     #
-    packages=find_packages(include='mctools'),  # Required
+    packages=['mctools'],  # Required
 
     # Specify which Python versions you support. In contrast to the
     # 'Programming Language' classifiers above, 'pip install' will check this
@@ -182,7 +181,7 @@ setup(
     # executes the function `main` from this package when invoked:
     entry_points={  # Optional
         'console_scripts': [
-            'mcli.py=mcli.py:main',
+            'mcli=mctools.__main__:main',
         ],
     },
 
@@ -198,5 +197,6 @@ setup(
     project_urls={  # Optional
         'Bug Reports': home + '/issues',
         'Source': home,
+        'Documentation': 'https://mctools.readthedocs.io/'
     },
 )

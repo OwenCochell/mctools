@@ -213,3 +213,4 @@ Conclusion
 ==========
 
 You should now have a basic understanding of the 'mcli.py' frontend and how to use it.
+After you install mctools throught pip(or some other method), then the 'mcli' command should be available.

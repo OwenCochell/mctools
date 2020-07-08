@@ -57,7 +57,7 @@ html_theme_options = {'description': 'Tools for interacting with Minecraft serve
                       'github_type': 'watch',
                       'extra_nav_links': {
                           'Github Page': 'https://github.com/Owen-Cochell/mctools',
-                          'PyPi Page': 'https://en.wikipedia.org/wiki/Zero_page',
+                          'PyPi Page': 'https://pypi.org/project/mctools/',
                           'Issue Tracker': 'https://github.com/Owen-Cochell/mctools/issues'
                       }}
 

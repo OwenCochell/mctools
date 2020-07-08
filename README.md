@@ -16,6 +16,8 @@ This allows you to the following:
  - And much more!
  
 All of this can be achieved using simple, intuitive calls to mctools. mctools does all the heavy lifting for you!
+Also, mctools has no external dependencies(Unless you are a windows user and need color support),
+and only uses the python standard library. Just download and go!
 
 # Example
 
@@ -44,7 +46,12 @@ Send a command to the Minecraft server via rcon:
  
     $ pip install mctools
     
- For more information on installing mctools, check out the instillation section in our documentation{LINK HERE!]
+ If you are a windows user and want color support, then install mctools like so:
+ 
+    $ pip install mctools[color]
+    
+ For more information on installing mctools, check out the instillation section in our 
+ [documentation](https://mctools.readthedocs.io/).
  
  # Formatting
  
@@ -82,23 +89,30 @@ Send a command to the Minecraft server via rcon:
  mctools also handels situations where content is sent in ChatObject notation, and can extract messages from the 
  player sample list.
  
- To learn more about formatters, and how to create your own, then please check out the formatting documentation[LINK HERE!].
+ To learn more about formatters, and how to create your own, 
+ then please check out the [formatting documentation](https://mctools.readthedocs.io/).
  
  # Command line tool
  
- mctools is shipped with a CLI front end called mcli.py, which you can use to start rcon sessions, get stats
+ mctools is shipped with a CLI front end called mcli, which you can use to start rcon sessions, get stats
  via query/ping, check if a Minecraft server is up, ect. 
  
- After installing mctools(through pip or some other method), you can invoke mcli.py like so:
+ After installing mctools(through pip or setuptools), you can invoke mcli like so:
  
-    $ mcli.py --help
+    $ mcli --help
     
- This will generate the help menu for mcli.py. To learn more about mcli.py, please check out the documentation{LINK HERE!]
+ You can also run mcli.py(which is located in the parent directory) if you downloaded the source code and did not
+ install via pip/setuptools.
+    
+ This will generate the help menu for mcli. To learn more about mcli, please check out the 
+ [mcli documentation](https://mctools.readthedocs.io/).
  
  # Documentation
  
  mctools has an extensive documentation. It contains tutorials, the API reference, and best practice recommendations.
- You can find the documentation here[LINK HERE!].
+ You can find the [documentation here](https://mctools.readthedocs.io/).
+ 
+ Be sure to also check out the [mctools PyPi page](https://pypi.org/project/mctools/) for more information.
  
  # Conclusion
  
