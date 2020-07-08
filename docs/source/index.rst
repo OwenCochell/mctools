@@ -39,7 +39,7 @@ the client tutorial, as it gives you a general idea of how clients work.
 
 .. toctree::
    :maxdepth: 2
-   :caption: Contents
+   :caption: Contents:
 
    install
    client
