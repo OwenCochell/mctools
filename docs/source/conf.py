@@ -48,6 +48,10 @@ exclude_patterns = []
 #
 html_theme = 'alabaster'
 
+# Set the master document:
+
+master_doc = 'index'
+
 # Some options for alabaster:
 
 html_theme_options = {'description': 'Tools for interacting with Minecraft servers',

@@ -15,7 +15,7 @@ what color/effect the text should have.
 
 For example:
 
-.. code-block::
+.. code-block:: none
 
     §4This text will appear red.
 
@@ -27,7 +27,7 @@ However, these characters can make it difficult to read the content of the messa
 
 For example, take the following help output:
 
-.. code-block::
+.. code-block:: none
 
     §e--------- §fHelp: Index (1/40) §e--------------------
     §7Use /help [n] to get page n of help.
@@ -139,7 +139,7 @@ dictionaries to format text instead of formatting characters.
 
 Here is an example of a description in ChatObject notation:
 
-.. code-block::
+.. code-block:: python
 
     {'description':
 
@@ -174,7 +174,7 @@ valid players from message content.
 
 Have a look at this example sample player list:
 
-.. code-block::
+.. code-block:: python
 
     'players': {'max': 5000,
              'online': 723,
@@ -201,7 +201,7 @@ a message.
 
 After the formatting operation is complete, the *player* sub-dictionary will look like this:
 
-.. code-block::
+.. code-block:: python
 
     'players': {'max': 5000,
              'online': 723,
