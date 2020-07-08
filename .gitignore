@@ -1,0 +1,29 @@
+# Gitignore File
+
+# IntelliJ project files
+.idea
+*.iml
+out
+gen
+
+# Python Environments
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Python Files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Python distribution archive directory
+
+dist/
+
+# Sphinx build files
+
+docs/build/
