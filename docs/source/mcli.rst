@@ -13,6 +13,18 @@ General Usage
 
 This section defines general usage for mcli.py
 
+.. note::
+
+    From this point onwards, we reference mcli.py as mcli,
+    which is how you would call the command if you installed via pip or setuptools.
+
+    However, if you downloaded the source code or the source distribution without installing,
+    the you will call mcli as a python file:
+
+    .. code-block:: python
+
+        python3 mcli.py [arguments]
+
 General Arguments
 -----------------
 
@@ -74,7 +86,7 @@ For example, let's say you wanted to connect to 'mc.server.net' on port 12345:
 
 .. code-block:: python
 
-    python3 mcli.py mc.server.net:12345 [...]
+    mcli mc.server.net:12345 [...]
 
 This will set the port number to 12345.
 
@@ -92,7 +104,7 @@ Each connection type has specific arguments, which we will be going into. For no
 
 .. code-block:: python
 
-    python3 mcli.py mc.server.net rcon [...]
+    mcli mc.server.net rcon [...]
 
 This will start a RCON connection to 'mc.server.net'.
 
@@ -114,14 +126,14 @@ After you have specified your optional parameters, you must provide a password. 
 
 .. code-block:: python
 
-    python3 mcli.py [OPTIONAL ARGUMENTS] mc.server.net rcon [OPTIONAL ARGUMENTS] [PASSWORD]
+    mcli [OPTIONAL ARGUMENTS] mc.server.net rcon [OPTIONAL ARGUMENTS] [PASSWORD]
 
 For example, let's say you wanted to start an interactive RCON session with 'mc.server.net' with the password
 'Minecraft is Cool!':
 
 .. code-block:: python
 
-    python3 mcli.py mc.server.net rcon --interactive 'Minecraft is Cool!'
+    mcli mc.server.net rcon --interactive 'Minecraft is Cool!'
 
 
 This will create an interactive RCON session with 'mc.server.net'.
@@ -140,7 +152,7 @@ For example, lets say you wanted to retrieve full Query statistics from 'mc.serv
 
 .. code-block:: python
 
-    python3 mcli.py mc.server.net:1234 query -fs
+    mcli mc.server.net:1234 query -fs
 
 PING Usage
 ==========
@@ -160,7 +172,7 @@ For example, lets say you wanted to ping 'mc.server.net', but pretend to be Mine
 
 .. code-block:: python
 
-    python3 mcli.py mc.server.net ping -p 393
+    mcli mc.server.net ping -p 393
 
 Examples
 ========
@@ -171,46 +183,76 @@ Ping server and get basic stats:
 
 .. code-block:: python
 
-    mcli.py [hostname] ping
+    mcli [hostname] ping
 
 Backup and stop a Minecraft server via RCON:
 
 .. code-block:: python
 
-    mcli.py [hostname] rcon --command backup --command stop [password]
+    mcli [hostname] rcon --command backup --command stop [password]
 
 Message player 'ILoveCraft' on 'mc.server.net' with password 'craft':
 
 .. code-block:: python
 
-    mcli.py mc.server.net rcon --command 'msg ILoveCraft Minecraft loves you too!' craft
+    mcli mc.server.net rcon --command 'msg ILoveCraft Minecraft loves you too!' craft
 
 Start an interactive RCON session with 'mc.example.com' on port 858585, with test as the password:
 
 .. code-block:: python
 
-    mcli.py mc.example.com:858585 rcon --interactive test
+    mcli mc.example.com:858585 rcon --interactive test
 
 Get full stats via Query and output the result to 'query.txt':
 
 .. code-block:: python
 
-    mcli.py -o query.txt [hostanme] query --full-stats
+    mcli -o query.txt [hostanme] query --full-stats
 
 Get basic stats via query and disable color:
 
 .. code-block:: python
 
-    mcli.py --no-color [hostname] query
+    mcli --no-color [hostname] query
 
 Ping server, but leave format chars:
 
 .. code-block:: python
 
-    mcli.py --raw [hostname] ping
+    mcli --raw [hostname] ping
+
+Screenshots
+===========
+
+Here are some screenshots of mcli in action:
+
+RCON Usage
+----------
+
+Interactive RCON session
+
+.. image:: rcon.png
+    :alt: rcon screenshot
+
+Query usage
+-----------
+
+Fetching full statistics via Query
+
+.. image:: query.png
+    :alt: query screenshot
+    :height: 300px
+
+Ping usage
+----------
+
+Pinging Minecraft server and fetching statistics
+
+.. image:: ping.png
+    :alt: query screenshot
 
 Conclusion
 ==========
 
 You should now have a basic understanding of the 'mcli.py' frontend and how to use it.
-After you install mctools throught pip(or some other method), then the 'mcli' command should be available.
+After you install mctools through pip(or some other method), then the 'mcli' command should be available.

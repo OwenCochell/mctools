@@ -1,6 +1,8 @@
 # Minecraft Connection Tools
 A python implementation for interacting with Minecraft servers.
 
+[![Documentation Status](https://readthedocs.org/projects/mctools/badge/?version=latest)](https://mctools.readthedocs.io/en/latest/?badge=latest)
+
 # Introduction
 
 mctools allows you to interact with Minecraft servers via [rcon](https://wiki.vg/RCON), 
@@ -51,7 +53,7 @@ Send a command to the Minecraft server via rcon:
     $ pip install mctools[color]
     
  For more information on installing mctools, check out the instillation section in our 
- [documentation](https://mctools.readthedocs.io/).
+ [documentation](https://mctools.readthedocs.io/en/latest/install.html).
  
  # Formatting
  
@@ -90,7 +92,7 @@ Send a command to the Minecraft server via rcon:
  player sample list.
  
  To learn more about formatters, and how to create your own, 
- then please check out the [formatting documentation](https://mctools.readthedocs.io/).
+ then please check out the [formatting documentation](https://mctools.readthedocs.io/en/latest/format.html).
  
  # Command line tool
  
@@ -105,7 +107,7 @@ Send a command to the Minecraft server via rcon:
  install via pip/setuptools.
     
  This will generate the help menu for mcli. To learn more about mcli, please check out the 
- [mcli documentation](https://mctools.readthedocs.io/).
+ [mcli documentation](https://mctools.readthedocs.io/en/latest/mcli.html).
  
  # Documentation
  
@@ -117,6 +119,6 @@ Send a command to the Minecraft server via rcon:
  # Conclusion
  
  mctools offers a pythonic, reliable way to interact with Minecraft servers, without being too complicated.
- If you have any questions or issues, then please open an issue. Pull requests of any kind a welcome and encouraged!
+ If you have any questions or problems, then please open an issue. Pull requests of any kind a welcome and encouraged!
  
  Thank you for reading!
