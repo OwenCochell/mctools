@@ -1,5 +1,5 @@
 ============
-Instillation
+Installation
 ============
 
 Introduction

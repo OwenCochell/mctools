@@ -20,9 +20,10 @@ __pycache__/
 *.py[cod]
 *$py.class
 
-# Python distribution archive directory
+# Python distribution archive directory/PyInstaller spec files
 
 dist/
+*.spec
 
 # Sphinx build files
 

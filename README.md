@@ -58,7 +58,7 @@ Send a command to the Minecraft server via rcon:
  # Formatting
  
  mctools has support for handling Minecraft formatting codes. 
- You can decide weather mctools replaces formatting charcters with intended values, removes them, or leaves them be.
+ You can decide weather mctools replaces formatting characters with intended values, removes them, or leaves them be.
  
  For example, lets say you received the following content during a rcon session:
  
@@ -88,7 +88,7 @@ Send a command to the Minecraft server via rcon:
     WorldEdit: All commands for WorldEdit
  
  Much easier to read and process. mctools handles this operation automatically, so you don't have to.
- mctools also handels situations where content is sent in ChatObject notation, and can extract messages from the 
+ mctools also handles situations where content is sent in ChatObject notation, and can extract messages from the 
  player sample list.
  
  To learn more about formatters, and how to create your own, 
