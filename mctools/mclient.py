@@ -16,7 +16,7 @@ class BaseClient(object):
 
     """
     Parent class for Minecraft Client implementations.
-    This class has th3e following formatting constants, which every client inherits:
+    This class has the following formatting constants, which every client inherits:
 
       - BaseClient.RAW - Tells the client to not format any content.
       - BaseClient.REPLACE - Tells the client to replace format characters.

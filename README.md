@@ -24,24 +24,24 @@ and only uses the python standard library. Just download and go!
 # Example
 
 Send a command to the Minecraft server via rcon:
+```python
+from mctools import RCONClient  # Import the RCONClient
 
-    from mctools import RCONClient  # Import the RCONClient
+HOST = 'mc.server.net'  # Hostname of the Minecraft server
+PORT = 1234  # Port number of the RCON server
 
-    HOST = 'mc.server.net'  # Hostname of the Minecraft server
-    PORT = 1234  # Port number of the RCON server
+# Create the RCONClient:
 
-    # Create the RCONClient:
+rcon = RCONClient(HOST, port=PORT)
 
-    rcon = RCONClient(HOST, port=PORT)
+# Login to RCON:
 
-    # Login to RCON:
+if rcon.login("password"):
 
-    if rcon.login("password"):
+    # Send command to RCON - broadcast message to all players:
 
-        # Send command to RCON - broadcast message to all players:
-
-        resp = rcon.command("broadcast Hello RCON!")
- 
+    resp = rcon.command("broadcast Hello RCON!")
+```
  # Instillation
  
  You can install mctools via pip:
