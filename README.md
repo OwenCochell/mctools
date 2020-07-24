@@ -8,7 +8,7 @@ A python implementation for interacting with Minecraft servers.
 mctools allows you to interact with Minecraft servers via [rcon](https://wiki.vg/RCON), 
 [query](https://wiki.vg/Query), and [server list ping protocol](https://wiki.vg/Server_List_Ping).
 
-This allows you to the following:
+This allows you to do the following:
 
  - Send and receive Minecraft server commands
  - Get player count(max and currently playing)
