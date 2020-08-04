@@ -1,0 +1,323 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>mcli usage &#8212; Minecraft-Connection-Tools 1.0.0 documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/language_data.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="API Reference" href="api.html" />
+    <link rel="prev" title="Formatting Tutorial" href="format.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="mcli-usage">
+<h1>mcli usage<a class="headerlink" href="#mcli-usage" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="introduction">
+<h2>Introduction<a class="headerlink" href="#introduction" title="Permalink to this headline">¶</a></h2>
+<p>‘mcli.py’ is a command line application that provides a front end for the mctools library.
+mcli supports all operations offered by mctools in a simple, robust manner.</p>
+</div>
+<div class="section" id="general-usage">
+<h2>General Usage<a class="headerlink" href="#general-usage" title="Permalink to this headline">¶</a></h2>
+<p>This section defines general usage for mcli.py</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>From this point onwards, we reference mcli.py as mcli,
+which is how you would call the command if you installed via pip or setuptools.</p>
+<p>However, if you downloaded the source code or the source distribution without installing,
+the you will call mcli as a python file:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">python3</span> <span class="n">mcli</span><span class="o">.</span><span class="n">py</span> <span class="p">[</span><span class="n">arguments</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="general-arguments">
+<h3>General Arguments<a class="headerlink" href="#general-arguments" title="Permalink to this headline">¶</a></h3>
+<dl class="simple">
+<dt>usage: mcli.py [-h] [-o PATH] [-oc | -or] [-nc] [-r] [-t TIMEOUT] [-ri REQID]</dt><dd><p>[-q]
+host {rcon,query,ping}</p>
+</dd>
+</dl>
+<p>Shows the help menu:</p>
+<p>-h, –help</p>
+<p>Disables color output, and removes format characters from the server output:</p>
+<p>-nc, –no-color</p>
+<p>Shows format characters, does not replace or remove them:</p>
+<p>-r, –raw</p>
+<p>Sets a timeout value for socket operations in seconds(default value is 60):</p>
+<p>-t [TIMEOUT], –timeout [TIMEOUT]</p>
+<p>Sets a custom request ID, instead of generating one:</p>
+<p>-ri [REQID], –reqid [REQID]</p>
+<p>Quiet mode, will not output anything to the terminal:</p>
+<p>-q, –quiet</p>
+</div>
+<div class="section" id="output-options">
+<h3>Output Options<a class="headerlink" href="#output-options" title="Permalink to this headline">¶</a></h3>
+<p>This section defines arguments for outputting server responses to a external file.</p>
+<p>Saves the output to a file in JSON format (only saves relevant content, such as server responses and errors):</p>
+<p>-o [PATH], –output [PATH]</p>
+<p>Replaces format characters with ascii color codes in the output file. Default action is to remove them:</p>
+<p>-oc, –output-color</p>
+<p>Leaves formatting characters when outputting to a file. Default action is to remove them:</p>
+<p>-or, –output-raw</p>
+</div>
+<div class="section" id="hostname">
+<h3>Hostname<a class="headerlink" href="#hostname" title="Permalink to this headline">¶</a></h3>
+<p>After you have specified your optional arguments, you must provide a hostname to connect to.
+A hostname can be a domain name or IP address, anything that your computer can resolve.</p>
+<p>If you need to use a custom port, you can specify it using the ‘:’ character after the hostname.
+If no port number is specified, then the default port number for the connection you selected will be used.</p>
+<p>For example, let’s say you wanted to connect to ‘mc.server.net’ on port 12345:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">mcli</span> <span class="n">mc</span><span class="o">.</span><span class="n">server</span><span class="o">.</span><span class="n">net</span><span class="p">:</span><span class="mi">12345</span> <span class="p">[</span><span class="o">...</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>This will set the port number to 12345.</p>
+</div>
+<div class="section" id="specifying-a-connection-type">
+<h3>Specifying a Connection type<a class="headerlink" href="#specifying-a-connection-type" title="Permalink to this headline">¶</a></h3>
+<p>After you have specified your optional arguments and hostname, you must specify a connection type.
+You may choose from the following:</p>
+<blockquote>
+<div><ol class="arabic simple">
+<li><p>rcon</p></li>
+<li><p>query</p></li>
+<li><p>ping</p></li>
+</ol>
+</div></blockquote>
+<p>Each connection type has specific arguments, which we will be going into. For now, an example:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">mcli</span> <span class="n">mc</span><span class="o">.</span><span class="n">server</span><span class="o">.</span><span class="n">net</span> <span class="n">rcon</span> <span class="p">[</span><span class="o">...</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>This will start a RCON connection to ‘mc.server.net’.</p>
+</div>
+</div>
+<div class="section" id="rcon-usage">
+<h2>RCON Usage<a class="headerlink" href="#rcon-usage" title="Permalink to this headline">¶</a></h2>
+<p>Setting ‘rcon’ as the connection type will start a RCON connection to the server.
+The following arguments are available for RCON:</p>
+<p>Send a command to the RCON server. Can specify multiple:</p>
+<p>-c [COMMAND], –command [COMMAND]</p>
+<p>Starts an interactive session with the RCON server:</p>
+<p>-i, –interactive</p>
+<p>After you have specified your optional parameters, you must provide a password. This is a required field.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">mcli</span> <span class="p">[</span><span class="n">OPTIONAL</span> <span class="n">ARGUMENTS</span><span class="p">]</span> <span class="n">mc</span><span class="o">.</span><span class="n">server</span><span class="o">.</span><span class="n">net</span> <span class="n">rcon</span> <span class="p">[</span><span class="n">OPTIONAL</span> <span class="n">ARGUMENTS</span><span class="p">]</span> <span class="p">[</span><span class="n">PASSWORD</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>For example, let’s say you wanted to start an interactive RCON session with ‘mc.server.net’ with the password
+‘Minecraft is Cool!’:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">mcli</span> <span class="n">mc</span><span class="o">.</span><span class="n">server</span><span class="o">.</span><span class="n">net</span> <span class="n">rcon</span> <span class="o">--</span><span class="n">interactive</span> <span class="s1">&#39;Minecraft is Cool!&#39;</span>
+</pre></div>
+</div>
+<p>This will create an interactive RCON session with ‘mc.server.net’.</p>
+</div>
+<div class="section" id="query-usage">
+<h2>QUERY Usage<a class="headerlink" href="#query-usage" title="Permalink to this headline">¶</a></h2>
+<p>Setting ‘query’ as the connection type will start a QUERY connection to the server.
+The following arguments are available for QUERY:</p>
+<p>Retrieve full stats(mcli retrieves basic stats by default):</p>
+<p>-fs, –full-stats</p>
+<p>For example, lets say you wanted to retrieve full Query statistics from ‘mc.server.net’ on port 1234:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">mcli</span> <span class="n">mc</span><span class="o">.</span><span class="n">server</span><span class="o">.</span><span class="n">net</span><span class="p">:</span><span class="mi">1234</span> <span class="n">query</span> <span class="o">-</span><span class="n">fs</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="ping-usage">
+<h2>PING Usage<a class="headerlink" href="#ping-usage" title="Permalink to this headline">¶</a></h2>
+<p>Setting ‘ping’ as the connection type will start a PING connection to the server.
+The following arguments are available for PING:</p>
+<p>Output favicon data to the terminal(mcli does not output favicon data by default):</p>
+<p>-sf, –show-favicon</p>
+<p>Use a custom protocol number:</p>
+<p>-p PROTOCOL_NUMBER</p>
+<p>For example, lets say you wanted to ping ‘mc.server.net’, but pretend to be Minecraft version 1.13:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">mcli</span> <span class="n">mc</span><span class="o">.</span><span class="n">server</span><span class="o">.</span><span class="n">net</span> <span class="n">ping</span> <span class="o">-</span><span class="n">p</span> <span class="mi">393</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="examples">
+<h2>Examples<a class="headerlink" href="#examples" title="Permalink to this headline">¶</a></h2>
+<p>Below are some usage examples for mcli:</p>
+<p>Ping server and get basic stats:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">mcli</span> <span class="p">[</span><span class="n">hostname</span><span class="p">]</span> <span class="n">ping</span>
+</pre></div>
+</div>
+<p>Backup and stop a Minecraft server via RCON:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">mcli</span> <span class="p">[</span><span class="n">hostname</span><span class="p">]</span> <span class="n">rcon</span> <span class="o">--</span><span class="n">command</span> <span class="n">backup</span> <span class="o">--</span><span class="n">command</span> <span class="n">stop</span> <span class="p">[</span><span class="n">password</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>Message player ‘ILoveCraft’ on ‘mc.server.net’ with password ‘craft’:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">mcli</span> <span class="n">mc</span><span class="o">.</span><span class="n">server</span><span class="o">.</span><span class="n">net</span> <span class="n">rcon</span> <span class="o">--</span><span class="n">command</span> <span class="s1">&#39;msg ILoveCraft Minecraft loves you too!&#39;</span> <span class="n">craft</span>
+</pre></div>
+</div>
+<p>Start an interactive RCON session with ‘mc.example.com’ on port 858585, with test as the password:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">mcli</span> <span class="n">mc</span><span class="o">.</span><span class="n">example</span><span class="o">.</span><span class="n">com</span><span class="p">:</span><span class="mi">858585</span> <span class="n">rcon</span> <span class="o">--</span><span class="n">interactive</span> <span class="n">test</span>
+</pre></div>
+</div>
+<p>Get full stats via Query and output the result to ‘query.txt’:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">mcli</span> <span class="o">-</span><span class="n">o</span> <span class="n">query</span><span class="o">.</span><span class="n">txt</span> <span class="p">[</span><span class="n">hostanme</span><span class="p">]</span> <span class="n">query</span> <span class="o">--</span><span class="n">full</span><span class="o">-</span><span class="n">stats</span>
+</pre></div>
+</div>
+<p>Get basic stats via query and disable color:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">mcli</span> <span class="o">--</span><span class="n">no</span><span class="o">-</span><span class="n">color</span> <span class="p">[</span><span class="n">hostname</span><span class="p">]</span> <span class="n">query</span>
+</pre></div>
+</div>
+<p>Ping server, but leave format chars:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">mcli</span> <span class="o">--</span><span class="n">raw</span> <span class="p">[</span><span class="n">hostname</span><span class="p">]</span> <span class="n">ping</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="screenshots">
+<h2>Screenshots<a class="headerlink" href="#screenshots" title="Permalink to this headline">¶</a></h2>
+<p>Here are some screenshots of mcli in action:</p>
+<div class="section" id="id1">
+<h3>RCON Usage<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h3>
+<p>Interactive RCON session</p>
+<img alt="rcon screenshot" src="_images/rcon.png" />
+</div>
+<div class="section" id="id2">
+<h3>Query usage<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h3>
+<p>Fetching full statistics via Query</p>
+<a class="reference internal image-reference" href="_images/query.png"><img alt="query screenshot" src="_images/query.png" style="height: 300px;" /></a>
+</div>
+<div class="section" id="id3">
+<h3>Ping usage<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h3>
+<p>Pinging Minecraft server and fetching statistics</p>
+<img alt="query screenshot" src="_images/ping.png" />
+</div>
+</div>
+<div class="section" id="conclusion">
+<h2>Conclusion<a class="headerlink" href="#conclusion" title="Permalink to this headline">¶</a></h2>
+<p>You should now have a basic understanding of the ‘mcli.py’ frontend and how to use it.
+After you install mctools through pip(or some other method), then the ‘mcli’ command should be available.</p>
+</div>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">Minecraft-Connection-Tools</a></h1>
+
+
+
+<p class="blurb">Tools for interacting with Minecraft servers</p>
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=Owen-Cochell&repo=mctools&type=watch&count=true&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="client.html">Client Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="rcon.html">RCON Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="query.html">Query Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ping.html">Ping Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="format.html">Formatting Tutorial</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">mcli usage</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#introduction">Introduction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#general-usage">General Usage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#rcon-usage">RCON Usage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#query-usage">QUERY Usage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#ping-usage">PING Usage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#examples">Examples</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#screenshots">Screenshots</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#conclusion">Conclusion</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="api.html">API Reference</a></li>
+</ul>
+
+
+<hr />
+<ul>
+    
+    <li class="toctree-l1"><a href="https://github.com/Owen-Cochell/mctools">Github Page</a></li>
+    
+    <li class="toctree-l1"><a href="https://pypi.org/project/mctools/">PyPi Page</a></li>
+    
+    <li class="toctree-l1"><a href="https://github.com/Owen-Cochell/mctools/issues">Issue Tracker</a></li>
+    
+</ul>
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="format.html" title="previous chapter">Formatting Tutorial</a></li>
+      <li>Next: <a href="api.html" title="next chapter">API Reference</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2020, Owen Cochell.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.1.2</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/mcli.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

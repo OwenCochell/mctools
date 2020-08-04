@@ -1,0 +1,240 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome to Minecraft-Connection-Tools documentation! &#8212; Minecraft-Connection-Tools 1.0.0 documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/language_data.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Installation" href="install.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="welcome-to-minecraft-connection-tools-documentation">
+<h1>Welcome to Minecraft-Connection-Tools documentation!<a class="headerlink" href="#welcome-to-minecraft-connection-tools-documentation" title="Permalink to this headline">¶</a></h1>
+<p>This is the documentation for Minecraft-Connection-Tools(mctools) -
+an easy to use python library for querying, interacting, and gathering information on Minecraft servers.</p>
+<p>mctools implements the following Minecraft protocols:</p>
+<blockquote>
+<div><ol class="arabic simple">
+<li><p>RCON</p></li>
+<li><p>Query</p></li>
+<li><p>Server List Ping</p></li>
+</ol>
+</div></blockquote>
+<p>Here is a brief example of the RCONClient, one of the Minecraft client implementations:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">mctools</span> <span class="kn">import</span> <span class="n">RCONClient</span>  <span class="c1"># Import the RCONClient</span>
+
+<span class="n">HOST</span> <span class="o">=</span> <span class="s1">&#39;mc.server.net&#39;</span>  <span class="c1"># Hostname of the Minecraft server</span>
+<span class="n">PORT</span> <span class="o">=</span> <span class="mi">1234</span>  <span class="c1"># Port number of the RCON server</span>
+
+<span class="c1"># Create the RCONClient:</span>
+
+<span class="n">rcon</span> <span class="o">=</span> <span class="n">RCONClient</span><span class="p">(</span><span class="n">HOST</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="n">PORT</span><span class="p">)</span>
+
+<span class="c1"># Login to RCON:</span>
+
+<span class="k">if</span> <span class="n">rcon</span><span class="o">.</span><span class="n">login</span><span class="p">(</span><span class="s2">&quot;password&quot;</span><span class="p">):</span>
+
+    <span class="c1"># Send command to RCON - broadcast message to all players:</span>
+
+    <span class="n">resp</span> <span class="o">=</span> <span class="n">rcon</span><span class="o">.</span><span class="n">command</span><span class="p">(</span><span class="s2">&quot;broadcast Hello RCON!&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>We also offer a CLI front end for mctools, called ‘mcli.py’. You can read all about it below.</p>
+<p>This documentation contains tutorials on basic usage, as well as the API reference. We recommend starting with
+the client tutorial, as it gives you a general idea of how clients work.</p>
+<div class="toctree-wrapper compound">
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="install.html">Installation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="install.html#introduction">Introduction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="install.html#python">Python</a></li>
+<li class="toctree-l2"><a class="reference internal" href="install.html#instillation-via-pip">Instillation via PIP</a></li>
+<li class="toctree-l2"><a class="reference internal" href="install.html#source-code">Source Code</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="client.html">Client Tutorial</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="client.html#introduction">Introduction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="client.html#client-methods">Client Methods</a></li>
+<li class="toctree-l2"><a class="reference internal" href="client.html#instantiating-clients">Instantiating Clients</a></li>
+<li class="toctree-l2"><a class="reference internal" href="client.html#context-managers">Context Managers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="client.html#conclusion">Conclusion</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="rcon.html">RCON Tutorial</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="rcon.html#introduction">Introduction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="rcon.html#basic-rcon-usage">Basic RCON Usage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="rcon.html#conclusion">Conclusion</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="query.html">Query Tutorial</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="query.html#introduction">Introduction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="query.html#basic-query-usage">Basic Query Usage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="query.html#conclusion">Conclusion</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="ping.html">Ping Tutorial</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="ping.html#introduction">Introduction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ping.html#basic-ping-usage">Basic Ping usage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ping.html#conclusion">Conclusion</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="format.html">Formatting Tutorial</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="format.html#introduction">Introduction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="format.html#note-on-color-support">Note on color support</a></li>
+<li class="toctree-l2"><a class="reference internal" href="format.html#formatter-usage">Formatter Usage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="format.html#formattercollection-class">FormatterCollection class</a></li>
+<li class="toctree-l2"><a class="reference internal" href="format.html#custom-formatter">Custom Formatter</a></li>
+<li class="toctree-l2"><a class="reference internal" href="format.html#conclusion">Conclusion</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="mcli.html">mcli usage</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="mcli.html#introduction">Introduction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mcli.html#general-usage">General Usage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mcli.html#rcon-usage">RCON Usage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mcli.html#query-usage">QUERY Usage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mcli.html#ping-usage">PING Usage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mcli.html#examples">Examples</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mcli.html#screenshots">Screenshots</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mcli.html#conclusion">Conclusion</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="api.html">API Reference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="api.html#module-mctools.mclient">MClient Reference</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#module-mctools.packet">Packet Reference</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#module-mctools.encoding">Encoding Reference</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#module-mctools.protocol">Protocol Reference</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#module-mctools.formattertools">Formatting Tools Reference</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<div class="section" id="indices-and-tables">
+<h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this headline">¶</a></h1>
+<ul class="simple">
+<li><p><a class="reference internal" href="genindex.html"><span class="std std-ref">Index</span></a></p></li>
+<li><p><a class="reference internal" href="py-modindex.html"><span class="std std-ref">Module Index</span></a></p></li>
+<li><p><a class="reference internal" href="search.html"><span class="std std-ref">Search Page</span></a></p></li>
+</ul>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="#">Minecraft-Connection-Tools</a></h1>
+
+
+
+<p class="blurb">Tools for interacting with Minecraft servers</p>
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=Owen-Cochell&repo=mctools&type=watch&count=true&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="client.html">Client Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="rcon.html">RCON Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="query.html">Query Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ping.html">Ping Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="format.html">Formatting Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mcli.html">mcli usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api.html">API Reference</a></li>
+</ul>
+
+
+<hr />
+<ul>
+    
+    <li class="toctree-l1"><a href="https://github.com/Owen-Cochell/mctools">Github Page</a></li>
+    
+    <li class="toctree-l1"><a href="https://pypi.org/project/mctools/">PyPi Page</a></li>
+    
+    <li class="toctree-l1"><a href="https://github.com/Owen-Cochell/mctools/issues">Issue Tracker</a></li>
+    
+</ul>
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="#">Documentation overview</a><ul>
+      <li>Next: <a href="install.html" title="next chapter">Installation</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2020, Owen Cochell.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.1.2</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/index.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

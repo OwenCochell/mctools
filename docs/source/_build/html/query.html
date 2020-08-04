@@ -1,0 +1,260 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Query Tutorial &#8212; Minecraft-Connection-Tools 1.0.0 documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/language_data.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Ping Tutorial" href="ping.html" />
+    <link rel="prev" title="RCON Tutorial" href="rcon.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="query-tutorial">
+<h1>Query Tutorial<a class="headerlink" href="#query-tutorial" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="introduction">
+<h2>Introduction<a class="headerlink" href="#introduction" title="Permalink to this headline">¶</a></h2>
+<p>Welcome to the tutorial for QUERYClient!
+This section aims to give you a basic understanding on QUERYClient usage.</p>
+</div>
+<div class="section" id="basic-query-usage">
+<h2>Basic Query Usage<a class="headerlink" href="#basic-query-usage" title="Permalink to this headline">¶</a></h2>
+<p>mctools gives you the ability to retrieve server statistics via the
+<a class="reference external" href="https://wiki.vg/Query">Minecraft Query protocol</a>.
+The Minecraft Query protocol is an implementation of the
+<a class="reference external" href="http://wiki.unrealadmin.org/UT3_query_protocol">Gamespy Query protocol</a>.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>While the Minecraft Query protocol was made to be compatible
+with the Gamespy Query protocol, we don’t recommend using QUERYClient
+for anything other than Minecraft. No testing has been done on
+other Query implementations.</p>
+</div>
+<div class="section" id="creating-the-instance">
+<h3>Creating the Instance<a class="headerlink" href="#creating-the-instance" title="Permalink to this headline">¶</a></h3>
+<p>First, you must create a QUERYClient instance:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">mctools</span> <span class="kn">import</span> <span class="n">QUERYClient</span>
+
+<span class="n">query</span> <span class="o">=</span> <span class="n">QUERYClient</span><span class="p">(</span><span class="s1">&#39;mc.server.net&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>This will create a QUERYClient instance with the default configuration.
+All of the options can be set as you see fit, but the default configuration is recommended for most users.
+Query can only be used if the server has
+<a class="reference external" href="https://minecraft.gamepedia.com/Server.properties">Query functionality enabled</a>.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>For more information on general client configuration and instantiation, see the <a class="reference external" href="client.html">client tutorial.</a></p>
+</div>
+</div>
+<div class="section" id="retrieving-statistics">
+<h3>Retrieving Statistics<a class="headerlink" href="#retrieving-statistics" title="Permalink to this headline">¶</a></h3>
+<p>Their are two types of information you can retrieve from a server:
+basic stats and full stats.
+Basic stats show host IP, port number, message of the day, ect. This is fine for most uses.
+Full stats shows more information about the server, such as players connected,
+plugins installed, ect.
+We will walk through the process of retrieving both.</p>
+</div>
+<div class="section" id="basic-statistics">
+<h3>Basic statistics<a class="headerlink" href="#basic-statistics" title="Permalink to this headline">¶</a></h3>
+<p>You can retrieve basic stats like so:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">stats</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">get_basic_stats</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>This will fetch basic server statistics and put it into a dictionary.
+The dictionary has the following format:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="s1">&#39;gametype&#39;</span><span class="p">:</span> <span class="s1">&#39;SMP&#39;</span><span class="p">,</span>
+<span class="s1">&#39;hostip&#39;</span><span class="p">:</span> <span class="s1">&#39;127.0.0.1&#39;</span><span class="p">,</span>
+<span class="s1">&#39;hostport&#39;</span><span class="p">:</span> <span class="s1">&#39;25565&#39;</span><span class="p">,</span>
+<span class="s1">&#39;map&#39;</span><span class="p">:</span> <span class="s1">&#39;world&#39;</span><span class="p">,</span>
+<span class="s1">&#39;maxplayers&#39;</span><span class="p">:</span> <span class="s1">&#39;20&#39;</span><span class="p">,</span>
+<span class="s1">&#39;motd&#39;</span><span class="p">:</span> <span class="s1">&#39;Now we got business!&#39;</span><span class="p">,</span>
+<span class="s1">&#39;numplayers&#39;</span><span class="p">:</span> <span class="s1">&#39;1&#39;</span><span class="p">}</span>
+</pre></div>
+</div>
+<p>The <em>gametype</em> field is is hardcoded to ‘SMP’.</p>
+<p>The <em>hostip</em> field is the host IP of the server.</p>
+<p>The <em>hostport</em> field is the hostip of the server.</p>
+<p>The <em>map</em> field is the name of the current map.</p>
+<p>The <em>maxplayers</em> field is the maximum number of players.</p>
+<p>The <em>motd</em> field is the message of the day.</p>
+<p>The <em>numplayers</em> are the players connected to the server.</p>
+</div>
+<div class="section" id="full-statistics">
+<h3>Full statistics<a class="headerlink" href="#full-statistics" title="Permalink to this headline">¶</a></h3>
+<p>If you want to retrieve the full stats, you may do the following:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">stats</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">get_full_stats</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>This will fetch full server statistics and put it into a dictionary.
+The dictionary should have the following format:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="s1">&#39;game_id&#39;</span><span class="p">:</span> <span class="s1">&#39;MINECRAFT&#39;</span><span class="p">,</span>
+<span class="s1">&#39;gametype&#39;</span><span class="p">:</span> <span class="s1">&#39;SMP&#39;</span><span class="p">,</span>
+<span class="s1">&#39;hostip&#39;</span><span class="p">:</span> <span class="s1">&#39;127.0.0.1&#39;</span><span class="p">,</span>
+<span class="s1">&#39;hostport&#39;</span><span class="p">:</span> <span class="s1">&#39;25565&#39;</span><span class="p">,</span>
+<span class="s1">&#39;map&#39;</span><span class="p">:</span> <span class="s1">&#39;world&#39;</span><span class="p">,</span>
+<span class="s1">&#39;maxplayers&#39;</span><span class="p">:</span> <span class="s1">&#39;20&#39;</span><span class="p">,</span>
+<span class="s1">&#39;motd&#39;</span><span class="p">:</span> <span class="s1">&#39;Now we got business!&#39;</span><span class="p">,</span>
+<span class="s1">&#39;numplayers&#39;</span><span class="p">:</span> <span class="s1">&#39;1&#39;</span><span class="p">,</span>
+<span class="s1">&#39;players&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;MinecraftPlayer&#39;</span><span class="p">],</span>
+<span class="s1">&#39;plugins&#39;</span><span class="p">:</span> <span class="s1">&#39;&#39;</span><span class="p">,</span>
+<span class="s1">&#39;version&#39;</span><span class="p">:</span> <span class="s1">&#39;1.15.2&#39;</span><span class="p">}</span>
+</pre></div>
+</div>
+<p>The <em>game_id</em> field is hardcoded to ‘MINECRAFT’.</p>
+<p>The <em>gametype</em> field is hardcoded to ‘SMP’.</p>
+<p>The <em>hostip</em> field is the host IP of the server.</p>
+<p>The <em>hostport</em> field is the port number of the server.</p>
+<p>The <em>map</em> field is the name of current map.</p>
+<p>The <em>maxplayers</em> field is the maximum amount of players allowed on the server.</p>
+<p>The <em>motd</em> is the message of the day.</p>
+<p>The <em>numplayers</em> are the number of players currently connected.</p>
+<p>The <em>players</em> is a list containing the user names of all connected players.</p>
+<p>The <em>plugins</em> filed contains a list of plugins used.
+This is not used by the vanilla server, however community servers
+such as Bukkit and Spigot use this value. Most servers follow this format:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="n">SERVER_MOD_NAME</span><span class="p">[:</span> <span class="n">PLUGIN_NAME</span><span class="p">(;</span> <span class="n">PLUGIN_NAME</span><span class="o">...</span><span class="p">)]]</span>
+</pre></div>
+</div>
+<p>The <em>version</em> field is the version of the server.</p>
+</div>
+<div class="section" id="stopping-the-instance">
+<h3>Stopping the instance<a class="headerlink" href="#stopping-the-instance" title="Permalink to this headline">¶</a></h3>
+<p>Due to the <a class="reference external" href="https://en.wikipedia.org/wiki/User_Datagram_Protocol">UDP protocol’s</a> design(The protocol Query uses),
+the client instance does not <em>need</em> to be stopped.
+However, we still recommend stopping your client for readability, and so you can be explict as to when your
+program will stop communicating over the network.</p>
+</div>
+</div>
+<div class="section" id="conclusion">
+<h2>Conclusion<a class="headerlink" href="#conclusion" title="Permalink to this headline">¶</a></h2>
+<p>That concludes the tutorial on QUERYClient usage!</p>
+</div>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">Minecraft-Connection-Tools</a></h1>
+
+
+
+<p class="blurb">Tools for interacting with Minecraft servers</p>
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=Owen-Cochell&repo=mctools&type=watch&count=true&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="client.html">Client Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="rcon.html">RCON Tutorial</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Query Tutorial</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#introduction">Introduction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#basic-query-usage">Basic Query Usage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#conclusion">Conclusion</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="ping.html">Ping Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="format.html">Formatting Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mcli.html">mcli usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api.html">API Reference</a></li>
+</ul>
+
+
+<hr />
+<ul>
+    
+    <li class="toctree-l1"><a href="https://github.com/Owen-Cochell/mctools">Github Page</a></li>
+    
+    <li class="toctree-l1"><a href="https://pypi.org/project/mctools/">PyPi Page</a></li>
+    
+    <li class="toctree-l1"><a href="https://github.com/Owen-Cochell/mctools/issues">Issue Tracker</a></li>
+    
+</ul>
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="rcon.html" title="previous chapter">RCON Tutorial</a></li>
+      <li>Next: <a href="ping.html" title="next chapter">Ping Tutorial</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2020, Owen Cochell.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.1.2</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/query.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

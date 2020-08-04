@@ -1,0 +1,244 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RCON Tutorial &#8212; Minecraft-Connection-Tools 1.0.0 documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/language_data.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Query Tutorial" href="query.html" />
+    <link rel="prev" title="Client Tutorial" href="client.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="rcon-tutorial">
+<h1>RCON Tutorial<a class="headerlink" href="#rcon-tutorial" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="introduction">
+<h2>Introduction<a class="headerlink" href="#introduction" title="Permalink to this headline">¶</a></h2>
+<p>Welcome to the tutorial for RCONClient!
+This section aims to give you a basic understanding of RCONClient usage.</p>
+</div>
+<div class="section" id="basic-rcon-usage">
+<h2>Basic RCON Usage<a class="headerlink" href="#basic-rcon-usage" title="Permalink to this headline">¶</a></h2>
+<p>mctools gives you the ability to interact with a server via RCON.
+The <a class="reference external" href="https://wiki.vg/RCON">Minecraft RCON protocol</a> allows admins to remotely execute Minecraft commands.
+The Minecraft RCON protocol is an implementation of the
+<a class="reference external" href="https://developer.valvesoftware.com/wiki/Source_RCON_Protocol">Source RCON protocol</a>.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>While the RCON protocol is a common standard,
+we do not recommend using RCONClient for anything other than Minecraft.
+There has been no testing done on other RCON implementations.</p>
+</div>
+<div class="section" id="creating-the-instance">
+<h3>Creating The Instance<a class="headerlink" href="#creating-the-instance" title="Permalink to this headline">¶</a></h3>
+<p>First, you must create a RCONClient instance:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">mctools</span> <span class="kn">import</span> <span class="n">RCONClient</span>
+
+<span class="n">rcon</span> <span class="o">=</span> <span class="n">RCONClient</span><span class="p">(</span><span class="s1">&#39;mc.server.net&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>This will create a RCONClient instance with the default configuration.
+All of the options can be set as you see fit, but the default configuration is recommended for most users.
+RCON can only be used if the server has
+<a class="reference external" href="https://minecraft.gamepedia.com/Server.properties">RCON functionality enabled.</a></p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>For more information on general client configuration and instantiation, see the <a class="reference external" href="client.html">client tutorial.</a></p>
+</div>
+</div>
+<div class="section" id="authenticating-with-the-rcon-server">
+<h3>Authenticating with the RCON server<a class="headerlink" href="#authenticating-with-the-rcon-server" title="Permalink to this headline">¶</a></h3>
+<p>Before you can start sending commands, you must first authenticate like so:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">success</span> <span class="o">=</span> <span class="n">rcon</span><span class="o">.</span><span class="n">login</span><span class="p">(</span><span class="s1">&#39;password&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Where ‘password’ is the password used to authenticate.</p>
+<p>The function will return True for success, and False for failure.
+Most servers will require you to specify a password before you can send commands.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>By default, RCONClient will raise an exception if you attempt to send commands when not authenticated.
+You can read about disabling this feature below, but be aware that sending commands while not authenticated can
+lead to unstable operation.</p>
+</div>
+<p>If you have failed to authenticate, you may try again. mctools will allow you to attempt to authenticate as many times
+as you need, but the RCON server may have security features in place to block repeated login attempts.</p>
+<p>If you have successfully authenticated, you can now start sending commands to the RCON server.</p>
+<p>You can check if you are authenticated like so:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">auth</span> <span class="o">=</span> <span class="n">rcon</span><span class="o">.</span><span class="n">is_authenticated</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>This function will return True if you are authenticated, False if not.</p>
+</div>
+<div class="section" id="interacting-with-the-rcon-server">
+<h3>Interacting with the RCON server<a class="headerlink" href="#interacting-with-the-rcon-server" title="Permalink to this headline">¶</a></h3>
+<p>You may now send Minecraft commands to the server like so:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">response</span> <span class="o">=</span> <span class="n">rcon</span><span class="o">.</span><span class="n">command</span><span class="p">(</span><span class="s2">&quot;command&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Where ‘command’ is the command you wish to send to the RCON server.
+The function will return the response in string format from the server, formatted appropriately.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>You can disable the authentication check by passing ‘no_auth=True’ to the command function, which will disable
+the check for this command. Again, be aware that this can lead to unstable operation.</p>
+</div>
+<p>For example, if you wanted to broadcast ‘Hello RCON!’ to every player on the server,
+you would issue the following:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">response</span> <span class="o">=</span> <span class="n">rcon</span><span class="o">.</span><span class="n">command</span><span class="p">(</span><span class="s2">&quot;broadcast Hello RCON!&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The command sent will broadcast “Hello RCON!” to every player on the server.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Sometimes, the server will respond with an empty string. Some commands have no output, or return an empty string
+when issued over RCON, so this is usually a normal operation. It can also mean that the server doesn’t understand
+the command issued.</p>
+</div>
+</div>
+<div class="section" id="ending-the-session">
+<h3>Ending the session<a class="headerlink" href="#ending-the-session" title="Permalink to this headline">¶</a></h3>
+<p>To end the session with the server correctly, do the following:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">rcon</span><span class="o">.</span><span class="n">stop</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>This will stop the underlying TCP connection to the server.
+It is ALWAYS recommended to stop the instance, as not doing so could cause problems server-side.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Once a RCONClient instance is stopped, it can’t be reused/restarted. This is because of the design of
+Python socket objects. You must create a new RCONClient to interact with the RCON server.</p>
+</div>
+</div>
+</div>
+<div class="section" id="conclusion">
+<h2>Conclusion<a class="headerlink" href="#conclusion" title="Permalink to this headline">¶</a></h2>
+<p>And that concludes the basic usage for RCONClient!</p>
+</div>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">Minecraft-Connection-Tools</a></h1>
+
+
+
+<p class="blurb">Tools for interacting with Minecraft servers</p>
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=Owen-Cochell&repo=mctools&type=watch&count=true&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="client.html">Client Tutorial</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">RCON Tutorial</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#introduction">Introduction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#basic-rcon-usage">Basic RCON Usage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#conclusion">Conclusion</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="query.html">Query Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ping.html">Ping Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="format.html">Formatting Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mcli.html">mcli usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api.html">API Reference</a></li>
+</ul>
+
+
+<hr />
+<ul>
+    
+    <li class="toctree-l1"><a href="https://github.com/Owen-Cochell/mctools">Github Page</a></li>
+    
+    <li class="toctree-l1"><a href="https://pypi.org/project/mctools/">PyPi Page</a></li>
+    
+    <li class="toctree-l1"><a href="https://github.com/Owen-Cochell/mctools/issues">Issue Tracker</a></li>
+    
+</ul>
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="client.html" title="previous chapter">Client Tutorial</a></li>
+      <li>Next: <a href="query.html" title="next chapter">Query Tutorial</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2020, Owen Cochell.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.1.2</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/rcon.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
