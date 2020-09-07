@@ -1,7 +1,9 @@
 import struct
 import socket
+
 from mctools.packet import RCONPacket, QUERYPacket, PINGPacket
 from mctools.encoding import PINGEncoder
+from mctools.errors import RCONCommunicationError, RCONLengthError
 
 """
 Low-level protocol stuff for RCON, Query and Server List Ping.
@@ -11,7 +13,8 @@ Low-level protocol stuff for RCON, Query and Server List Ping.
 class BaseProtocol(object):
 
     """
-    Parent Class for protocol implementations,
+    Parent Class for protocol implementations.
+    Every protocol instance should inherit this class!
     """
 
     def start(self):
@@ -54,15 +57,25 @@ class BaseProtocol(object):
 
         raise NotImplementedError("Override this method in child class!")
 
-    def read_tcp(self, length):
+    def read_tcp(self, length, timeout=''):
 
         """
         Reads data over the TCP protocol.
 
         :param length: Amount of data to read
         :type length: int
+        :param timeout: Specify a timeout that is different from the master timeout value
+        :type timeout: int, None
         :return: Read bytes
         """
+
+        # Figure out what our timeout is:
+
+        if type(timeout) in [None, int]:
+
+            # Valid timeout value, set it for this operation:
+
+            self.sock.settimeout(timeout)
 
         byts = b''
 
@@ -72,11 +85,13 @@ class BaseProtocol(object):
 
             last = self.sock.recv(length - len(byts))
 
-            if len(last) == 0:
-
-                raise Exception("Server sent no information!")
-
             byts = byts + last
+
+        if type(timeout) in [None, int]:
+
+            # Set our timeout value back to what it was:
+
+            self.sock.settimeout(timeout)
 
         return byts
 
@@ -132,11 +147,13 @@ class RCONProtocol(BaseProtocol):
 
         self.host = host  # Host of the RCON server
         self.port = int(port)  # Port of the RCON server
-        self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)  # Creating a ip4 TCP socket
+        self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)  # Creating an ip4 TCP socket
         self.LOGIN = 3  # Packet type used for logging in
         self.COMMAND = 2  # Packet type for issuing a command
         self.RESPONSE = 0  # Packet type for response
+        self.MAX_SIZE = 4096  # Maximum packet size
         self.connected = False  # Value determining if we are connected
+        self.timeout = timeout  # Global timeout value
 
         self.sock.settimeout(timeout)  # Setting timeout value for socket
 
@@ -179,25 +196,32 @@ class RCONProtocol(BaseProtocol):
 
         data = bytes(pack)
 
+        # Check if data is too big:
+
+        if len(data) == 1460:
+
+            # Too big, raise an exception!
+
+            raise RCONLengthError("Packet type is too big!", len(data))
+
         # Sending packet:
 
         self.write_tcp(data)
 
-    def read(self):
+    def read(self, timeout=''):
 
         """
-        Gets an RCON packet from the RCON server.
-        Supports packet fragmenting.
+        Gets a RCON packet from the RCON server.
 
-        :return: RCONPacket contaning payload
+        :param timeout: Timeout value specific to this operation.
+        :type timeout: int, None
+        :return: RCONPacket containing payload
         :rtype: RCONPacket
         """
 
         # Getting first 4 bytes to determine length of packet:
 
-        length_data = self.read_tcp(4)
-
-        assert len(length_data) >= 4
+        length_data = self.read_tcp(4, timeout=timeout)
 
         # Unpacking length data:
 
@@ -205,7 +229,7 @@ class RCONProtocol(BaseProtocol):
 
         # Reading the rest of the packet:
 
-        byts = self.read_tcp(length)
+        byts = self.read_tcp(length, timeout=timeout)
 
         # Generating packet:
 
@@ -223,7 +247,7 @@ class RCONProtocol(BaseProtocol):
 
             self.sock.close()
 
-        except:
+        except Exception:
 
             pass
 

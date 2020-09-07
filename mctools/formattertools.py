@@ -52,7 +52,7 @@ NAME_MAP = {'black': '0',
             'dark_purple': '5',
             'gold': '6',
             'gray': '7',
-            'dark_grey': '8',
+            'dark_gray': '8',
             'blue': '9',
             'green': 'a',
             'aqua': 'b',
@@ -406,7 +406,7 @@ class PINGFormatter(BaseFormatter):
 
             else:
 
-                # Primitive formatting, handel it:
+                # Primitive formatting, handle it:
 
                 stat_dict['description'] = (DefaultFormatter.format(stat_dict['description']) if form == 1 else
                                             DefaultFormatter.clean(stat_dict['description']))
@@ -455,54 +455,85 @@ class ChatObjectFormatter(BaseFormatter):
     """
 
     @staticmethod
-    def format(text):
+    def format(chat, color=None, attrib=None):
 
         """
         Formats a description dictionary, and returns the formatted text.
+        This gets tricky, as the server could define a variable number of child dicts that have their own
+        attributes/extra content.
+        So, we must implement some recursion to be able to parse and understand the entire string.
 
-        :param text: Dictionary to be formatted
-        :type text: dict
+        :param chat: Dictionary to be formatted
+        :type chat: dict
+        :param color: Parent text color, only used in recursive operations
+        :type color: str
+        :param attrib: Parent attributes, only used in recursive operations
+        :type attrib: str
         :return: Formatted text
         :rtype: str
         """
 
-        # Iterate over the values:
+        # Define some variables for keeping attributes in:
 
-        final = ""
+        attrib = attrib if attrib is not None else ''  # Text attributes we should add
+        color = color if color is not None else ''  # Color we should make the text
+        extra = ''  # Extra text we should add
+        text = ''  # Text we should display
 
-        for val in text['extra']:
+        # Iterate over each value:
 
-            # Iterate over the sub-dictionarys:
+        for val in chat:
 
-            temp = ''
-            color = ''
+            if val in NAME_MAP:
 
-            for key in val:
+                # We have a formatting character, check if we want it or not:
 
-                if key in NAME_MAP and val[key]:
+                if chat[val]:
 
-                    # We have a formatting character:
+                    # We want this character, add it to the attributes:
 
-                    temp = MAP[NAME_MAP[key]] + temp
+                    attrib = MAP[NAME_MAP[val]] + attrib
 
-                if key == 'color':
+                    continue
 
-                    # Found a valid color:
+                # We don't want this character, remove it if it is present:
 
-                    color = MAP[NAME_MAP[val[key]]]
+                attrib = attrib.replace(MAP[NAME_MAP[val]], '')
 
-                if key == 'text':
+                continue
 
-                    # Found our text, add it:
+            if val == 'color':
 
-                    temp = temp + val[key]
+                # Found a valid color:
 
-            # We have to specify color first, or else our style codes will get lost!
-            # This is only a problem on certain platforms.
+                color = MAP[NAME_MAP[chat[val]]]
 
-            final = final + MAP['r'] + color + temp + MAP['r']
+                continue
 
-        return final
+            if val == 'text':
+
+                # Found our text, add it:
+
+                text = chat[val]
+
+                continue
+
+        # See if their is any extra text to format:
+
+        if 'extra' in chat.keys():
+
+            # Some extra junk we have to process, iterate over it:
+
+            for child in chat['extra']:
+
+                # Send this extra text down with the parent values:
+
+                extra = extra + ChatObjectFormatter.format(child, color=color, attrib=attrib)
+
+        # We have to specify color first, or else our style codes will get lost!
+        # This is only a problem on certain platforms.
+
+        return MAP['r'] + color + attrib + text + MAP['r'] + extra
 
     @staticmethod
     def clean(text):
@@ -518,13 +549,15 @@ class ChatObjectFormatter(BaseFormatter):
 
         # Iterate over the values:
 
-        final = ''
+        final = text['text']
 
-        for val in text['extra']:
+        if 'extra' in text.keys():
 
-            # Add text to final:
+            # Iterate over each value and process it:
 
-            final = final + val['text']
+            for child in text['extra']:
+
+                final = final + ChatObjectFormatter.clean(child)
 
         return final
 

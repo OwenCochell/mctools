@@ -64,11 +64,12 @@ class RCONPacket(BasePacket):
     :type payload: str
     """
 
-    def __init__(self, reqid, reqtype, payload):
+    def __init__(self, reqid, reqtype, payload, length=0):
 
         self.reqid = reqid  # Request ID of the RCON packet
         self.reqtype = reqtype  # Request type of the RCON packet
         self.payload = payload  # Payload of the RCON packet
+        self.length = length  # Length of the packet, helps determine if we are fragmented
         self.type = 'rcon'  # Determining what type of packet we are
 
     @classmethod
@@ -83,7 +84,7 @@ class RCONPacket(BasePacket):
 
         reqid, reqtype, payload = RCONEncoder.decode(byts)
 
-        return cls(reqid, reqtype, payload)
+        return cls(reqid, reqtype, payload, length=len(byts))
 
     def __repr__(self):
 

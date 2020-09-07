@@ -1,7 +1,9 @@
 import time
+
 from mctools.protocol import RCONProtocol, QUERYProtocol, PINGProtocol
 from mctools.packet import RCONPacket, QUERYPacket, PINGPacket
 from mctools.formattertools import FormatterCollection, DefaultFormatter, QUERYFormatter, PINGFormatter
+from mctools.errors import RCONAuthenticationError, RCONMalformedPacketError
 
 """
 Main Minecraft Connection Clients - Easy to use API for the underlying modules
@@ -44,10 +46,13 @@ class BaseClient(object):
     def start(self):
 
         """
-        Starts the client, and any modules in use.
+        Starts the client, and any protocol objects/formatters in use.
         (Good idea to put a call to Protocol.start() here).
         This raises a 'NotImplementedError' exception,
         as this function should be overridden in the child class.
+
+        :raises:
+            NotImplementedError: If function is called.
         """
 
         raise NotImplementedError("Override this method in child class!")
@@ -55,10 +60,13 @@ class BaseClient(object):
     def stop(self):
 
         """
-        Stops the client, and any modules in use.
+        Stops the client, and any protocol objects/formatters in use.
         (Again, good idea to put a call to Protocol.stop() here).
         This raises a 'NotImplementedError' exception,
         as this function should be overridden in the child class.
+
+        :raises:
+            NotImplementedError: If function is called.
         """
 
         raise NotImplementedError("Override this method in child class!")
@@ -66,11 +74,14 @@ class BaseClient(object):
     def is_connected(self):
 
         """
-        Determine if we are connected to the remote entity.
+        Determine if we are connected to the remote entity,
+        whatever that may be.
         This raises a 'NotImplementedError' exception,
         as this function should be overridden in the child class.
 
         :return: True if connected, False if not.
+        :raises:
+            NotImplementedError: If function is called.
         """
 
         raise NotImplementedError("Override this method in child class!")
@@ -83,6 +94,8 @@ class BaseClient(object):
         as this function should be overridden in the child class.
 
         :param args: Arguments specified, varies from client to client.
+        :raises:
+            NotImplementedError: If function is called.
         """
 
         raise NotImplementedError("Override this method in child class!")
@@ -103,8 +116,6 @@ class BaseClient(object):
 
         """
         All clients MUST have context manager support!
-
-        :return:
         """
 
         raise NotImplementedError("Override this method in child class!")
@@ -130,10 +141,11 @@ class RCONClient(BaseClient):
     RCON client, allows for user to interact with the Minecraft server via the RCON protocol.
 
     :param host: Hostname of the Minecraft server
+    (Can be an IP address or domain name, anything your computer can resolve)
     :type host: str
     :param port: Port of the Minecraft server
     :type port: int
-    :param reqid: Request ID to use, leave as 'None' to generate one based on system time
+    :param reqid: Request ID to use, leave as 'None' to generate an ID based on system time
     :type reqid: int
     :param format_method: Format method to use. You should specify this using the Client constants
     :param format_method: int
@@ -206,17 +218,37 @@ class RCONClient(BaseClient):
 
         return self.auth
 
-    def raw_send(self, reqtype, payload):
+    def raw_send(self, reqtype, payload, frag_check=True):
 
         """
         Creates a RCON packet based off the following parameters and sends it.
+        This function is used for all networking operations.
+
+        We automatically check if a packet is fragmented(We check it's length).
+        If this is the case, then we send a junk packet, and we keep reading packets until the server
+        acknowledges the junk packet. This operation can take some time depending on network speed,
+        so we offer the option to disable this feature, with the risk that their might be stability issues.
+
+        .. warning:
+
+            Use this function at you own risk!
+            You should really call the high level functions,
+            as not doing so could mess up the state/connection of the client.
 
         :param reqtype: Request type
         :type reqtype: int
         :param payload: Payload to send
         :type payload: str
+        :param frag_check: Determines if we should check and handle packet fragmentation.
+
+        .. warning: Disabling fragmentation checks could lead to instability!
+                    Do so at your own risk!
+        :type frag_check: bool
         :return: RCONPacket containing response from server
         :rtype: RCONPacket
+        :raises:
+            RCONAuthenticationError: If the server refuses to server us and we are not authenticated.
+            RCONMalformedPacketError: If the request ID's do not match of the packet is otherwise malformed.
         """
 
         if not self.is_connected():
@@ -232,6 +264,54 @@ class RCONClient(BaseClient):
         # Receiving response packet:
 
         pack = self.proto.read()
+
+        # Check if our stuff is valid:
+
+        if pack.reqid != self.reqid and self.is_authenticated() and reqtype != self.proto.LOGIN:
+
+            # Client/server ID's do not match!
+
+            raise RCONMalformedPacketError("Client and server request ID's do not match!")
+
+        elif pack.reqid != self.reqid and reqtype != self.proto.LOGIN:
+
+            # Authentication issue!
+
+            raise RCONAuthenticationError("Client and server request ID's do not match! We are not authenticated!")
+
+        # Check if the packet is fragmented(And if we even care about fragmentation):
+
+        if frag_check and pack.length >= self.proto.MAX_SIZE:
+
+            # Send a junk packet:
+
+            self.proto.send(RCONPacket(self.reqid, 0, ''))
+
+            # Read until we get a valid response:
+
+            while True:
+
+                # Get a packet from the server:
+
+                temp_pack = self.proto.read()
+
+                if temp_pack.reqtype == self.proto.RESPONSE and temp_pack.payload == 'Unknown request 0':
+
+                    # Break, we are done here
+
+                    break
+
+                if temp_pack.reqid != self.reqid:
+
+                    # Client/server ID's do not match!
+
+                    raise RCONMalformedPacketError("Client and server request ID's do not match!")
+
+                # Add the packet content to the master pack:
+
+                pack.payload = pack.payload + temp_pack.payload
+
+        # Return our junk:
 
         return pack
 
@@ -276,57 +356,104 @@ class RCONClient(BaseClient):
     def authenticate(self, password):
 
         """
-        Convience function, does the same thing that 'login' does, authenticates you with the RCON server.
+        Convenience function, does the same thing that 'login' does, authenticates you with the RCON server.
 
         :param password: Password to authenticate with
+        :type password: str
         :return: True if successful, False if failure
         :rtype: bool
         """
 
         return self.login(password)
 
-    def command(self, com, no_auth=False):
+    def command(self, com, check_auth=True, format_method=None, return_packet=False):
 
         """
         Sends a command to the RCON server and gets a response.
 
+        .. note:
+            Be sure to authenticate before sending commands to the server!
+            Most servers will simply refuse to talk to you if you do not authenticate.
+
         :param com: Command to send
         :type com: str
-        :param no_auth: Value determining if we should check authentication status.
-        :type no_auth: False
+        :param check_auth: Value determining if we should check authentication status before sending our command
+        :type check_auth: bool
+        :param format_method: Format method to use. If 'None', we will use the global format method
+        :type format_method: int
+        :param return_packet: Determines if we should return the entire packet. If not, return the payload
+        :type return_packet: bool
         :return: Response text from server
-        :rtype: str
+        :rtype: str, RCONPacket
+        :raises:
+            RCONAuthenticationError: If we are not authenticated to the RCON server,
+            and authentication checking is enabled. We also raise this if the server refuses to serve us,
+            regardless of weather auth checking is enabled.
+            RCONMalformedPacketError: If the packet we received is broken or is not the correct packet.
         """
 
-        # Getting command packet:
+        # Checking authentication status:
 
-        self.proto.send(RCONPacket(self.reqid, 2, com))
+        if check_auth and not self.is_authenticated():
 
-        # Getting response packet:
+            # Not authenticated, let the user know this:
 
-        pack = self.proto.read()
+            raise RCONAuthenticationError("Not authenticated to the RCON server!")
 
-        if pack.reqid != self.reqid:
+        # Sending command packet:
 
-            # We are not logged in!
+        pack = self.raw_send(self.proto.COMMAND, com)
 
-            raise Exception("Client is not authenticated!")
+        # Get the formatted content:
+
+        pack = self._format(pack, com, format_method=format_method)
+
+        if return_packet:
+
+            # Return the entire packet:
+
+            return pack
+
+        # Return just the payload
+
+        return pack.payload
+
+    def _format(self, pack, com, format_method=None):
+
+        """
+        Sends incoming data to the formatter.
+
+        :param pack: Packet to format
+        :type pack: RCONPacket
+        :param com: Command issued
+        :type com: str
+        :param format_method: Custom formatting operation for this content. Overrides the global setting.
+        :type format_method: str, int
+        :return: Formatted content
+        :rtype: RCONPacket
+        """
+
+        if format_method is None:
+
+            # Use the global format method
+
+            format_method = self.format
 
         # Formatting text:
 
-        if self.format == 'replace' or self.format == 1:
+        if format_method == 'replace' or format_method == 1:
 
             # Replacing format chars
 
             pack.payload = self.formatters.format(pack.payload, com)
 
-        elif self.format == 'clean' or self.format == 2:
+        elif format_method == 'clean' or format_method == 2:
 
             # Removing format chars
 
             pack.payload = self.formatters.clean(pack.payload, com)
 
-        return pack.payload
+        return pack
 
     def __enter__(self):
 

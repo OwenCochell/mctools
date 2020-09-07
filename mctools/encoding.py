@@ -1,7 +1,8 @@
-# -*- coding: utf-8 -*-
 
 import struct
 import json
+
+from mctools.errors import RCONMalformedPacketError
 
 """
 Encoding/Decoding Tools for RCON and Query.
@@ -97,7 +98,11 @@ class RCONEncoder(BaseEncoder):
 
         # Checking padding:
 
-        assert byts[len(byts) - 2:] == RCONEncoder.PAD
+        if not byts[len(byts) - 2:] == RCONEncoder.PAD:
+
+            # No padding detected, something is wrong:
+
+            raise RCONMalformedPacketError("Missing or malformed padding!")
 
         # Returning values:
 
