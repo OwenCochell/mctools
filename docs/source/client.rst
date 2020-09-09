@@ -222,7 +222,7 @@ Here is an example of this in action:
 
     client.set_timeout(120)
 
-In this example, we have set the socket timeout to 60 seconds. All clients have the 'set_timeout'
+In this example, we have set the socket timeout to 120 seconds. All clients have the 'set_timeout'
 method.
 
 Packets

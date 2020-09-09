@@ -1,9 +1,9 @@
 """
 Main Minecraft Connection Clients - Easy to use API for the underlying modules
 Combines the following:
-    - Protocol Implementations
-    - Packet implementations
-    - Formatting tools
+- Protocol Implementations
+- Packet implementations
+- Formatting tools
 """
 
 
@@ -157,7 +157,7 @@ class RCONClient(BaseClient):
     RCON client, allows for user to interact with the Minecraft server via the RCON protocol.
 
     :param host: Hostname of the Minecraft server
-    (Can be an IP address or domain name, anything your computer can resolve)
+        (Can be an IP address or domain name, anything your computer can resolve)
     :type host: str
     :param port: Port of the Minecraft server
     :type port: int
@@ -245,10 +245,7 @@ class RCONClient(BaseClient):
         acknowledges the junk packet. This operation can take some time depending on network speed,
         so we offer the option to disable this feature, with the risk that their might be stability issues.
 
-        .. warning:
-
-            Use this function at you own risk!
-            You should really call the high level functions,
+        .. warning:: Use this function at you own risk! You should really call the high level functions,
             as not doing so could mess up the state/connection of the client.
 
         :param reqtype: Request type
@@ -256,15 +253,19 @@ class RCONClient(BaseClient):
         :param payload: Payload to send
         :type payload: str
         :param frag_check: Determines if we should check and handle packet fragmentation.
-
-        .. warning: Disabling fragmentation checks could lead to instability!
-                    Do so at your own risk!
         :type frag_check: bool
+
+        .. warning:: Disabling fragmentation checks could lead to instability! Do so at your own risk!
+
         :return: RCONPacket containing response from server
         :rtype: RCONPacket
         :raises:
             RCONAuthenticationError: If the server refuses to server us and we are not authenticated.
             RCONMalformedPacketError: If the request ID's do not match of the packet is otherwise malformed.
+
+        .. versionadded:: 1.1.0
+
+        The 'frag_check' parameter
         """
 
         if not self.is_connected():
@@ -387,7 +388,7 @@ class RCONClient(BaseClient):
         """
         Sends a command to the RCON server and gets a response.
 
-        .. note:
+        .. note::
 
             Be sure to authenticate before sending commands to the server!
             Most servers will simply refuse to talk to you if you do not authenticate.
@@ -397,14 +398,17 @@ class RCONClient(BaseClient):
         :param check_auth: Value determining if we should check authentication status before sending our command
         :type check_auth: bool
         :param format_method: Determines the format method we should use. If 'None', then we use the global value
-        You should use the Client constants to define this.
+            You should use the Client constants to define this.
         :type format_method: int
         :param return_packet: Determines if we should return the entire packet. If not, return the payload
         :type return_packet: bool
         :param frag_check: Determines if we should check and handle packet fragmentation
 
-        .. warning: Disabling fragmentation checks could lead to instability!
-                    Do so at your own risk!
+            .. warning::
+
+                Disabling fragmentation checks could lead to instability!
+                Do so at your own risk!
+
         :type frag_check: bool
         :return: Response text from server
         :rtype: str, RCONPacket
@@ -413,6 +417,10 @@ class RCONClient(BaseClient):
             and authentication checking is enabled. We also raise this if the server refuses to serve us,
             regardless of weather auth checking is enabled.
             RCONMalformedPacketError: If the packet we received is broken or is not the correct packet.
+
+        .. versionadded:: 1.1.0
+
+        The 'check_auth', 'format_method', 'return_packet', and 'frag_check' parameters
         """
 
         # Checking authentication status:
@@ -623,12 +631,16 @@ class QUERYClient(BaseClient):
         Gets basic stats from the Query server.
 
         :param format_method: Determines the format method we should use. If 'None', then we use the global value.
-        You should use the Client constants to define this
+            You should use the Client constants to define this
         :type format_method: int
         :param return_packet: Determines if we should return the entire packet. If not, return the payload
         :type return_packet: bool
         :return: Dictionary of basic stats.
         :rtype: dict
+
+        .. versionadded:: 1.1.0
+
+        The 'format_method' and 'return_packet' parameters
         """
 
         # Getting challenge response:
@@ -659,12 +671,16 @@ class QUERYClient(BaseClient):
         Gets full stats from the Query server.
 
         :param format_method: Determines the format method we should use. If 'None', then we use the global value.
-        You should use the Client constants to define this.
+            You should use the Client constants to define this.
         :type format_method: int
         :param return_packet: Determines if we should return the entire packet. If not, return the payload
         :type return_packet: bool
         :return: Dictionary of full stats.
         :rtype: dict
+
+        .. versionadded:: 1.1.0
+
+        The 'format_method' and 'return_packet' parameters
         """
 
         # Getting challenge response:
@@ -828,10 +844,6 @@ class PINGClient(BaseClient):
 
     def raw_send(self, pingnum, packet_type, proto=None, host=None, port=0, noread=False):
 
-        if proto is None:
-
-            proto = self.proto
-
         """
         Creates a PingPacket and sends it to the Minecraft server
 
@@ -850,6 +862,10 @@ class PINGClient(BaseClient):
         :return: PINGPacket
         :rtype: PINGPacket
         """
+
+        if proto is None:
+
+            proto = self.proto
 
         if not self.is_connected():
 
@@ -905,13 +921,11 @@ class PINGClient(BaseClient):
 
         return pack, total
 
-    def ping(self, timeout=None):
+    def ping(self):
 
         """
         Pings the Minecraft server and calculates the latency.
 
-        :param timeout: Timeout value used for this operation
-        :type timeout: int
         :return: Time elapsed(in milliseconds).
         :rtype: float
         """
@@ -936,12 +950,16 @@ class PINGClient(BaseClient):
         Gets stats from the Minecraft server.
 
         :param format_method: Determines the format method we should use. If 'None', then we use the global value.
-        You should use the Client constants to define this.
+            You should use the Client constants to define this.
         :type format_method: int
         :param return_packet: Determines if we should return the entire packet. If not, return the payload
         :type return_packet: bool
         :return: Dictionary containing stats.
         :rtype: dict
+
+        .. versionadded:: 1.1.0
+
+        The 'format_method' and 'return_packet' parameters
         """
 
         # Sending handshake packet:
