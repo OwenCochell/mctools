@@ -42,7 +42,7 @@ if rcon.login("password"):
 
     resp = rcon.command("broadcast Hello RCON!")
 ```
- # Instillation
+ # Installation 
  
  You can install mctools via pip:
  
@@ -94,7 +94,7 @@ if rcon.login("password"):
  To learn more about formatters, and how to create your own, 
  then please check out the [formatting documentation](https://mctools.readthedocs.io/en/latest/format.html).
  
- # Command line tool
+ # MCLI - mctools Command Line Interface
  
  mctools is shipped with a CLI front end called mcli, which you can use to start rcon sessions, get stats
  via query/ping, check if a Minecraft server is up, ect. 
@@ -106,7 +106,7 @@ if rcon.login("password"):
  You can also run mcli.py(which is located in the parent directory) if you downloaded the source code and did not
  install via pip/setuptools.
     
- This will generate the help menu for mcli. To learn more about mcli, please check out the 
+ The above command will generate the help menu for mcli. To learn more about mcli, please check out the 
  [mcli documentation](https://mctools.readthedocs.io/en/latest/mcli.html).
  
  # Documentation
@@ -116,9 +116,65 @@ if rcon.login("password"):
  
  Be sure to also check out the [mctools PyPi page](https://pypi.org/project/mctools/) for more information.
  
+ # Contributing
+ 
+ Pull requests are welcome and encouraged :) ! If you want to see a feature in mctools, a PR will be the quickest 
+ way to get it included. Feel free to email me or open an issue if you have any problems.
+ 
+ If you are interested in helping in the development of mctools, then send me an email, and we can get talking!
+ Believe me, there is plenty of work that needs to be done. More help would be greatly appreciated!
+ 
+ # Changelog
+ 
+ ## 1.1.0
+ 
+ This update adds some minor features and fixes some major bugs:
+ 
+  ### Bug Fixes:
+  
+ - Fixed RCON packet fragmentation issue, mctools should now properly detect and handle RCON packet fragmentation
+ - Fixed bug where PINGFormatter was looking for 'dark_grey' instead of 'dark_gray'
+ - Fixed bug where ChatObjectFormatter did not properly parse ChatObjects
+ - We now raise an exception if the RCON write data is too big, instead of leaving the connection in a unstable state
+    
+  ### Features Added:
+  
+ - Users can now specify the format method on a per-call basis
+ - Users can change the timeout value after the object is instantiated
+ - The RCON login check feature can be disabled, meaning that you can attempt to send packets
+ even if you are not authenticated
+ - Clients can now return raw packets
+ - RCON now has custom exceptions
+ 
+ This update is a prelude to another update I have working on.
+ The next update will add numerous features, such as:
+ 
+ - RCON Mixins for easing the process of getting/editing the following info:
+   - Players connected
+   - World Seed
+   - Game Rules
+   - Target Selectors
+   - Many more...
+ - Custom exceptions for Ping and Query
+ - Even Better error handling
+ - mcli RCON command/argument autocompletion
+ - Custom datatypes for all operations
+ - RCON SSH Forwarding support
+ (You can technically do this as of now, but I want the library to invoke and handle this process) for a more
+ secure RCON experience
+ - Unit tests for mctools
+    
+ I have some of these complete as of now, but I wanted to push out the big bug fixes and minor stuff before 
+ I finish creating and refining the features, as they may take me some time to implement.
+ 
+ All of these features will be completely optional, and they will all be backwards compatible.
+ So if you like the library as it is now, then you can completely ignore these new features.
+ 
+ The documentation has been updated to reflect these changes.
+ 
  # Conclusion
  
  mctools offers a pythonic, reliable way to interact with Minecraft servers, without being too complicated.
- If you have any questions or problems, then please open an issue. Pull requests of any kind a welcome and encouraged!
+ Please check the documentation for more information. More features (hopefully) coming soon!
  
  Thank you for reading!

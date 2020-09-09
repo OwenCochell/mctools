@@ -42,7 +42,7 @@ For example, take the following help output:
 
 This output is somewhat difficult to read. It would be easier if the formatting chars were replaced
 with ASCII color codes so we can see the response in color. It would also be easier if the characters were removed.
-mctools provides methods that can handel these formatting characters,
+mctools provides methods that can handle these formatting characters,
 so text can be made more human-readable.
 
 Note on color support
@@ -51,14 +51,15 @@ Note on color support
 The mctool's formatters add color and text attributes to text using
 `ASCII escape codes <https://en.wikipedia.org/wiki/ANSI_escape_code>`_ and
 `Ascii color codes <http://pueblo.sourceforge.net/doc/manual/ansi_color_codes.html>`_.
-In most cases, these color codes will be universally compatible, and the terminal in use will handel these codes,
+In most cases, these color codes will be universally compatible, and the terminal in use will handle these codes,
 and draw the text with the appropriate colors/attributes.
 
 However, some terminals will NOT support handling of ASCII escape codes, with
 `Windows 10 CMD.exe <https://en.wikipedia.org/wiki/Cmd.exe>`_ being one of them. This can lead to output that is either
-not colored or difficult to read, as terminals often output these characters.
+not colored or difficult to read, as these terminals often
+output the characters instead of applying the attributes to the text.
 
-To handel this, mctools offers an optional install dependency which will install the python library
+To handle this, mctools offers an optional install dependency which will install the python library
 `colorama <https://pypi.org/project/colorama/>`_. colorama will automatically enable ASCII escape code support, which
 will allow us to draw text in certain colors.
 
@@ -85,13 +86,13 @@ but a formatter can make any changes to the text as it sees fit.
     it's priority.
 
 For example, lets say that a server is replacing content with an '@' symbol every few characters,
-and you want to make a formatter that would handel this oddity.
+and you want to make a formatter that would handle this oddity.
 Your clean() method would simply remove each and every '@' character from the content.
 Your format() method, however, would attempt to replace the '@' characters with their intended values.
 Again, this is just a recommendation. Both methods can do the same operation
 if that's what the situation entails.
 
-mctools have some formatters built in for convenience. The builtins ONLY handel
+mctools has some formatters built in for convenience. The builtins ONLY handle
 formatting characters(With the exception of the special formatters). Builtin formatters all use static methods,
 meaning that a class does not have to be instantiated to be used.
 
@@ -249,7 +250,7 @@ The 'add' method adds a formatter to the collection. It has the following parame
     FormatterCollection will NOT instantiate your formatters. This means you must instantiate your formatter BEFORE
     adding it to the collection, or make all of your formatter methods static.
 
-FormatterCollection will only call a formatter that can handel relevant text.
+FormatterCollection will only call a formatter that can handle relevant text.
 To determine if text is relevant to a formatter, you must supply command(s) to the add method.
 The value can be a string containing a single command, or a list containing multiple. You may
 also supply a empty string('') to the command parameter to affiliate the formatter to every command
@@ -395,5 +396,5 @@ Conclusion
 ==========
 
 You should now have an understanding on the usage of formatters. Most of the time, the built in formatters
-will handel the formatting correctly. If this is not the case, then you can create and add your own formatter
+will handle the formatting correctly. If this is not the case, then you can create and add your own formatter
 to the client.

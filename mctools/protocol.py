@@ -1,13 +1,14 @@
+"""
+Low-level protocol stuff for RCON, Query and Server List Ping.
+"""
+
+
 import struct
 import socket
 
 from mctools.packet import RCONPacket, QUERYPacket, PINGPacket
 from mctools.encoding import PINGEncoder
 from mctools.errors import RCONCommunicationError, RCONLengthError
-
-"""
-Low-level protocol stuff for RCON, Query and Server List Ping.
-"""
 
 
 class BaseProtocol(object):
@@ -57,25 +58,15 @@ class BaseProtocol(object):
 
         raise NotImplementedError("Override this method in child class!")
 
-    def read_tcp(self, length, timeout=''):
+    def read_tcp(self, length):
 
         """
         Reads data over the TCP protocol.
 
         :param length: Amount of data to read
         :type length: int
-        :param timeout: Specify a timeout that is different from the master timeout value
-        :type timeout: int, None
         :return: Read bytes
         """
-
-        # Figure out what our timeout is:
-
-        if type(timeout) in [None, int]:
-
-            # Valid timeout value, set it for this operation:
-
-            self.sock.settimeout(timeout)
 
         byts = b''
 
@@ -86,12 +77,6 @@ class BaseProtocol(object):
             last = self.sock.recv(length - len(byts))
 
             byts = byts + last
-
-        if type(timeout) in [None, int]:
-
-            # Set our timeout value back to what it was:
-
-            self.sock.settimeout(timeout)
 
         return byts
 
@@ -128,6 +113,19 @@ class BaseProtocol(object):
         """
 
         self.sock.sendto(byts, (host, port))
+
+    def set_timeout(self, timeout):
+
+        """
+        Sets the timeout value for the underlying socket object.
+
+        :param timeout: Value in seconds to set the timeout to
+        :type timeout: int
+        """
+
+        # Set the timeout:
+
+        self.sock.settimeout(timeout)
 
 
 class RCONProtocol(BaseProtocol):
@@ -208,7 +206,7 @@ class RCONProtocol(BaseProtocol):
 
         self.write_tcp(data)
 
-    def read(self, timeout=''):
+    def read(self):
 
         """
         Gets a RCON packet from the RCON server.
@@ -221,7 +219,7 @@ class RCONProtocol(BaseProtocol):
 
         # Getting first 4 bytes to determine length of packet:
 
-        length_data = self.read_tcp(4, timeout=timeout)
+        length_data = self.read_tcp(4)
 
         # Unpacking length data:
 
@@ -229,7 +227,7 @@ class RCONProtocol(BaseProtocol):
 
         # Reading the rest of the packet:
 
-        byts = self.read_tcp(length, timeout=timeout)
+        byts = self.read_tcp(length)
 
         # Generating packet:
 

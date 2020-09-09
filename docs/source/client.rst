@@ -114,7 +114,7 @@ This function gives you access to the underlying Formatters instance:
 This returns the FormatterCollection instance in use by the client,
 which will allow you to fine tune the formatter to your use.
 
-More information can be found in the `Formatter Tutorial. <format.html>`_
+More information can be found in the `Formatter Tutorial. <format.html>`_.
 
 Instantiating Clients
 =====================
@@ -191,6 +191,20 @@ This will configure the client to remove all format characters.
 This logic applies to the other format options.
 The default operation is to replace format characters.
 
+You can also specify the formatting operation on a per-call basis.
+
+For example, let's say you are communicating via RCON,
+and want to remove the formatting characters from the 'help' command, instead of replace them.
+You would call the 'command' function like so:
+
+.. code-block:: python
+
+    resp = rcon.command('help', format_method=Client.REMOVE)
+
+Every client method where 'formattable' information is fetched has a
+'format_method' parameter that you can use to set a 'one time' formatting mode.
+If not specified, then the global formatting type will be used.
+
 For more information on formatters, please see the `Formatter Tutorial. <format.html>`_
 
 timeout
@@ -200,6 +214,30 @@ This parameter specifies the timeout length for socket operations.
 It is 60 seconds by default, but can be however long/short you want it to be.
 The value MUST be an integer. We don't recommend setting this value too high
 or too low.
+
+You can change the timeout at any time using the 'set_timeout' method.
+Here is an example of this in action:
+
+.. code-block:: python
+
+    client.set_timeout(120)
+
+In this example, we have set the socket timeout to 60 seconds. All clients have the 'set_timeout'
+method.
+
+Packets
+=======
+
+By default, clients only return the most relevant parts of a package, usually a payload.
+However, some users might want to work with the packages directly.
+All client methods that return server information/statistics can return the raw packets instead of the payloads.
+This can be done by setting the 'return_pack' argument to 'True'.
+
+Here is an example of this using the PINGClient:
+
+.. code-block:: python
+
+    pack = ping.get_stats(return_pack=True)
 
 Context Managers
 ================

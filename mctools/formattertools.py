@@ -532,8 +532,9 @@ class ChatObjectFormatter(BaseFormatter):
 
         # We have to specify color first, or else our style codes will get lost!
         # This is only a problem on certain platforms.
+        # We also send the text through the DefaultFormatter, as some servers send info this way
 
-        return MAP['r'] + color + attrib + text + MAP['r'] + extra
+        return MAP['r'] + color + attrib + DefaultFormatter.format(text) + extra
 
     @staticmethod
     def clean(text):
@@ -559,7 +560,9 @@ class ChatObjectFormatter(BaseFormatter):
 
                 final = final + ChatObjectFormatter.clean(child)
 
-        return final
+        # Clean up the text, just in case
+
+        return DefaultFormatter.clean(final)
 
 
 class SampleDescriptionFormatter(BaseFormatter):

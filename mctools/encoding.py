@@ -1,12 +1,13 @@
+"""
+Encoding/Decoding Tools for RCON and Query.
+"""
+
 
 import struct
 import json
 
 from mctools.errors import RCONMalformedPacketError
 
-"""
-Encoding/Decoding Tools for RCON and Query.
-"""
 
 MAP = {''}
 

@@ -1,10 +1,3 @@
-import time
-
-from mctools.protocol import RCONProtocol, QUERYProtocol, PINGProtocol
-from mctools.packet import RCONPacket, QUERYPacket, PINGPacket
-from mctools.formattertools import FormatterCollection, DefaultFormatter, QUERYFormatter, PINGFormatter
-from mctools.errors import RCONAuthenticationError, RCONMalformedPacketError
-
 """
 Main Minecraft Connection Clients - Easy to use API for the underlying modules
 Combines the following:
@@ -12,6 +5,16 @@ Combines the following:
     - Packet implementations
     - Formatting tools
 """
+
+
+import time
+
+from mctools.protocol import RCONProtocol, QUERYProtocol, PINGProtocol
+from mctools.packet import RCONPacket, QUERYPacket, PINGPacket
+from mctools.formattertools import FormatterCollection, DefaultFormatter, QUERYFormatter, PINGFormatter
+from mctools.errors import RCONAuthenticationError, RCONMalformedPacketError
+
+__version__ = '1.1.0'
 
 
 class BaseClient(object):
@@ -42,6 +45,19 @@ class BaseClient(object):
         """
 
         return int(time.time())
+
+    def set_timeout(self, timeout):
+
+        """
+        Sets the timeout for the underlying socket object.
+
+        :param timeout: Value in seconds to set the timeout to
+        :type timeout: int
+        """
+
+        # Have the protocol object set the timeout:
+
+        self.proto.set_timeout(timeout)
 
     def start(self):
 
@@ -366,12 +382,13 @@ class RCONClient(BaseClient):
 
         return self.login(password)
 
-    def command(self, com, check_auth=True, format_method=None, return_packet=False):
+    def command(self, com, check_auth=True, format_method=None, return_packet=False, frag_check=True):
 
         """
         Sends a command to the RCON server and gets a response.
 
         .. note:
+
             Be sure to authenticate before sending commands to the server!
             Most servers will simply refuse to talk to you if you do not authenticate.
 
@@ -379,10 +396,16 @@ class RCONClient(BaseClient):
         :type com: str
         :param check_auth: Value determining if we should check authentication status before sending our command
         :type check_auth: bool
-        :param format_method: Format method to use. If 'None', we will use the global format method
+        :param format_method: Determines the format method we should use. If 'None', then we use the global value
+        You should use the Client constants to define this.
         :type format_method: int
         :param return_packet: Determines if we should return the entire packet. If not, return the payload
         :type return_packet: bool
+        :param frag_check: Determines if we should check and handle packet fragmentation
+
+        .. warning: Disabling fragmentation checks could lead to instability!
+                    Do so at your own risk!
+        :type frag_check: bool
         :return: Response text from server
         :rtype: str, RCONPacket
         :raises:
@@ -402,7 +425,7 @@ class RCONClient(BaseClient):
 
         # Sending command packet:
 
-        pack = self.raw_send(self.proto.COMMAND, com)
+        pack = self.raw_send(self.proto.COMMAND, com, frag_check=frag_check)
 
         # Get the formatted content:
 
@@ -427,8 +450,9 @@ class RCONClient(BaseClient):
         :type pack: RCONPacket
         :param com: Command issued
         :type com: str
-        :param format_method: Custom formatting operation for this content. Overrides the global setting.
-        :type format_method: str, int
+        :param format_method: Determines the format method we should use. If 'None', then we use the global value.
+        You should use the Client constants to define this.
+        :type format_method: int
         :return: Formatted content
         :rtype: RCONPacket
         """
@@ -593,11 +617,16 @@ class QUERYClient(BaseClient):
 
         return pack
 
-    def get_basic_stats(self):
+    def get_basic_stats(self, format_method=None, return_packet=False):
 
         """
         Gets basic stats from the Query server.
 
+        :param format_method: Determines the format method we should use. If 'None', then we use the global value.
+        You should use the Client constants to define this
+        :type format_method: int
+        :param return_packet: Determines if we should return the entire packet. If not, return the payload
+        :type return_packet: bool
         :return: Dictionary of basic stats.
         :rtype: dict
         """
@@ -612,15 +641,28 @@ class QUERYClient(BaseClient):
 
         # Formatting the packet:
 
-        data = self._format(pack)
+        pack.data = self._format(pack, format_method=format_method)
 
-        return data
+        if return_packet:
 
-    def get_full_stats(self):
+            # Return just the packet:
+
+            return pack
+
+        # Return the payload
+
+        return pack.data
+
+    def get_full_stats(self, format_method=None, return_packet=False):
 
         """
         Gets full stats from the Query server.
 
+        :param format_method: Determines the format method we should use. If 'None', then we use the global value.
+        You should use the Client constants to define this.
+        :type format_method: int
+        :param return_packet: Determines if we should return the entire packet. If not, return the payload
+        :type return_packet: bool
         :return: Dictionary of full stats.
         :rtype: dict
         """
@@ -635,31 +677,51 @@ class QUERYClient(BaseClient):
 
         # Formatting the packet:
 
-        data = self._format(pack)
+        pack.data = self._format(pack, format_method=format_method)
 
-        return data
+        if return_packet:
 
-    def _format(self, data):
+            # Return the packet:
+
+            return pack
+
+        # Return the payload
+
+        return pack.data
+
+    def _format(self, data, format_method=None):
 
         """
         Sends the incoming data to the formatter.
 
         :param data: Data to be formatted
         :type data: QUERYPacket
+        :param format_method: Format method to use. If 'None', then we use the global value.
+        :type format_method: int
         :return: Formatted data
         """
+
+        # Check what format type we are using:
+
+        format_type = format_method
+
+        if format_method is None:
+
+            # Use the global format method
+
+            format_type = self.format
 
         # Extracting data from packet:
 
         data = data.data
 
-        if self.format == "replace" or self.format == 1:
+        if format_type == "replace" or format_type == 1:
 
             # Replace format codes with desired values:
 
             data = self.formatters.format(data, "QUERY_PROTOCOL")
 
-        elif self.format in ['clean', 'remove'] or self.format == 2:
+        elif format_type in ['clean', 'remove'] or format_type == 2:
 
             # Remove format codes:
 
@@ -843,11 +905,13 @@ class PINGClient(BaseClient):
 
         return pack, total
 
-    def ping(self):
+    def ping(self, timeout=None):
 
         """
         Pings the Minecraft server and calculates the latency.
 
+        :param timeout: Timeout value used for this operation
+        :type timeout: int
         :return: Time elapsed(in milliseconds).
         :rtype: float
         """
@@ -866,11 +930,16 @@ class PINGClient(BaseClient):
 
         return time_elapsed
 
-    def get_stats(self):
+    def get_stats(self, format_method=None, return_packet=False):
 
         """
         Gets stats from the Minecraft server.
 
+        :param format_method: Determines the format method we should use. If 'None', then we use the global value.
+        You should use the Client constants to define this.
+        :type format_method: int
+        :param return_packet: Determines if we should return the entire packet. If not, return the payload
+        :type return_packet: bool
         :return: Dictionary containing stats.
         :rtype: dict
         """
@@ -893,31 +962,52 @@ class PINGClient(BaseClient):
 
         # Formatting the packet:
 
-        data = self._format(pack)
+        pack.data = self._format(pack, format_method=format_method)
 
-        return data
+        if return_packet:
 
-    def _format(self, pack):
+            # Return the packet:
+
+            return pack
+
+        # Return just the payload
+
+        return pack.data
+
+    def _format(self, pack, format_method=None):
 
         """
         Sends the incoming data to the formatter.
 
         :param pack: Packet to be formatted
         :type pack: PINGPacket
+        :param format_method: Determines the format method we should use. If 'None', then we use the global value.
+        You should use the Client constants to define this.
+        :type format_method: int
         :return: Formatted data.
         """
+
+        # Figure out what format method we are using:
+
+        format_type = format_method
+
+        if format_method is None:
+
+            # Use the global value:
+
+            format_type = self.format
 
         # Extracting the data from the packet:
 
         data = pack.data
 
-        if self.format == "replace" or self.format == 1:
+        if format_type == "replace" or format_type == 1:
 
             # Replace format codes with desired values:
 
             data = self.formatters.format(data, "PING_PROTOCOL")
 
-        elif self.format in ['clean', 'remove'] or self.format == 2:
+        elif format_type in ['clean', 'remove'] or format_type == 2:
 
             # Remove format codes:
 

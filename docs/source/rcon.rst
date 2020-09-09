@@ -90,7 +90,8 @@ The function will return the response in string format from the server, formatte
 .. note::
 
     You can disable the authentication check by passing 'no_auth=True' to the command function, which will disable
-    the check for this command. Again, be aware that this can lead to unstable operation.
+    the check for this command. Be aware that if the server refuses to serve you, then a RCONAuthenticationError
+    exception will be raised.
 
 For example, if you wanted to broadcast 'Hello RCON!' to every player on the server,
 you would issue the following:
@@ -106,6 +107,37 @@ The command sent will broadcast "Hello RCON!" to every player on the server.
     Sometimes, the server will respond with an empty string. Some commands have no output, or return an empty string
     when issued over RCON, so this is usually a normal operation. It can also mean that the server doesn't understand
     the command issued.
+
+RCON Packet Fragmentation
+_________________________
+
+Sometimes, the RCON server will send fragmented packets.
+This is because RCON has a maximum packet size of 4096 bytes.
+RCONClient will automatically handle packet fragmentation for you.
+
+If the packet received is 4096 bytes in length, then we will assume the packet is fragmented.
+We send a junk packet to the server, and read packets until the server acknowledges the junk packet.
+RCON ensures that all packets are sent in the order that they are received, meaning that once the server responds to
+the junk packet, then we can be sure that we have all of the relevant packets.
+We then concatenate the packets we received, and return it as one.
+
+However, you can disable the check by passing 'frag_check=False' to the command method.
+
+.. warning::
+
+    Disabling fragmentation checks is not recommended! Doing so could mess up the state of your client!
+
+Here is an example of disabling RCON packet fragmentation:
+
+.. code-block:: python
+
+    # Lets run a command that generates fragmentation:
+
+    resp = rcon.command("help", frag_check=False)
+
+This will return the content of the first 4096 bytes. Any subsequent to 'command' or 'raw_send' will return the rest
+of the fragmented packets. This means that you will have incomplete content, and subsequent calls will return
+irrelevant information. Unless you have a reason for this, it is recommended to keep packet fragmentation enabled.
 
 Ending the session
 ------------------

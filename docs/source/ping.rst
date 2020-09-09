@@ -135,7 +135,7 @@ However, some servers take it upon themselves to embed messages into the player 
 or give the description in `ChatObject <https://wiki.vg/Chat>`_ notation. If you have formatting enabled,
 then these cases are automatically handled for you.
 
-You can read more about the ping formatters and how they handel data in the `Forrmatting tutorial <format.html>`_.
+You can read more about the ping formatters and how they handle data in the `Formatting tutorial <format.html>`_.
 
 Stopping the instance
 ---------------------

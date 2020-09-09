@@ -6,6 +6,12 @@ Below is the API reference for mctools. Each feature is broken up into a differe
 The average user shouldn't have to worry about these, and should instead use the higher level client classes
 and functions. You can find tutorials on how to use them elsewhere in this documentation.
 
+Exceptions
+==========
+
+.. automodule:: mctools.errors
+    :members:
+
 MClient Reference
 =================
 

@@ -1,8 +1,9 @@
-from mctools.encoding import RCONEncoder, QUERYEncoder, PINGEncoder
-
 """
 Packet classes to hold RCON and Query data
 """
+
+
+from mctools.encoding import RCONEncoder, QUERYEncoder, PINGEncoder
 
 
 class BasePacket(object):

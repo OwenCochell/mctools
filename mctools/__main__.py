@@ -51,7 +51,7 @@ class Output:
 
     """
     Class for outputting values to terminal, as well as writing output to files, if necessary
-    We use the mclient formattertools to handel the formatting for us,
+    We use the mclient formattertools to handle the formatting for us,
     As the user probably doesn't want a bunch of ASCII values in their output file.
     """
 
