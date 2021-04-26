@@ -8,7 +8,7 @@ import socket
 
 from mctools.packet import RCONPacket, QUERYPacket, PINGPacket
 from mctools.encoding import PINGEncoder
-from mctools.errors import RCONCommunicationError, RCONLengthError
+from mctools.errors import RCONCommunicationError, RCONLengthError, ProtoConnectionClosed
 
 
 class BaseProtocol(object):
@@ -77,6 +77,16 @@ class BaseProtocol(object):
             last = self.sock.recv(length - len(byts))
 
             byts = byts + last
+
+            if last == b'':
+
+                # We received nothing, lets close this connection:
+
+                self.stop()
+
+                # Raise the 'ConnectionClosed' excpetion:
+
+                raise ProtoConnectionClosed("Connection closed by remote host!")
 
         return byts
 

@@ -13,6 +13,32 @@ class MCToolsError(Exception):
     pass
 
 
+class ProtocolError(MCToolsError):
+
+    """
+    Base class for protocol errors.
+
+    A protocol error is raised when an issue arises with the python socket object.
+    These exceptions will be raised for ALL clients, 
+    as they all use the same backend.
+    """
+
+
+class ProtoConnectionClosed(ProtocolError):
+
+    """
+    Exception raised when the connection is closed by the socket we are connected to.
+
+    This occurs when we receive empty bytes from 'recv()',
+    as this means that the remote socket is done writing,
+    meaning that our connection is closed.
+    """
+
+    def __init__(self, message) -> None:
+        
+        self.message = message  # Explanation of the error
+
+
 class RCONError(MCToolsError):
 
     """
