@@ -24,6 +24,7 @@ __pycache__/
 
 dist/
 *.spec
+*.egg-info
 
 # VSCode files:
 
