@@ -126,6 +126,12 @@ if rcon.login("password"):
  
  # Changelog
  
+ ## 1.1.1
+
+ Fixed an issue where clients hang when the connection is closed by the remote host.
+
+ New features mentioned in the previous changelog are still coming, albeit slowly!
+
  ## 1.1.0
  
  This update adds some minor features and fixes some major bugs:

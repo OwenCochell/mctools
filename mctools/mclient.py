@@ -14,7 +14,7 @@ from mctools.packet import RCONPacket, QUERYPacket, PINGPacket
 from mctools.formattertools import FormatterCollection, DefaultFormatter, QUERYFormatter, PINGFormatter
 from mctools.errors import RCONAuthenticationError, RCONMalformedPacketError
 
-__version__ = '1.1.0'
+__version__ = '1.1.1'
 
 
 class BaseClient(object):

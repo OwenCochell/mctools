@@ -255,6 +255,40 @@ When the 'with' block is exited (or an exception occurs),
 then the stop() method will automatically be called.
 This ensures that the client always gracefully stops the connection.
 
+Exceptions
+==========
+
+Each client has their own set of exceptions that are raised when necessary.
+However, individual clients do not raise exceptions when network issues occur,
+which is where 'ProtocolErrors' come in.
+
+A 'ProtocolError' is an exception raised by the underlying protocol object that
+each client uses. This means that it does not matter which client you are using,
+if a network issue occurs, then a 'ProtocolError' will be raised.  
+
+List of 'ProtocolErrors':
+
+    1. ProtocolError - Base exception for all protocol errors
+    2. ProtoConnectionClosed - Raised when the connection is closed by the remote host
+   
+Here is an example of importing and handling these exceptions:
+
+.. code-block:: python
+
+    from mctools.errors import ProtoConnectionClosed  # Import the exception we wish to handle
+
+    with client as Client('example.host', port=1234):
+
+        try:
+
+            client.do_something()
+
+        except ProtoConnectionClosed:
+
+            # Exception has been handled, and the client has been stopped:
+
+            print("Remote host closed connection!")
+
 Conclusion
 ==========
 

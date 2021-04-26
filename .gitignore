@@ -25,6 +25,11 @@ __pycache__/
 dist/
 *.spec
 
+# VSCode files:
+
+.vscode/
+
 # Sphinx build files
 
 docs/build/
+docs/source/_build
