@@ -36,6 +36,9 @@ build/
 docs/build/
 docs/source/_build
 
-# General dummy files:
+# General test/build files:
 
 test.py
+build_exe.bat
+build_pypi.sh
+build_pypi.bat

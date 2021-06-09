@@ -108,6 +108,11 @@ if rcon.login("password"):
     
  The above command will generate the help menu for mcli. To learn more about mcli, please check out the 
  [mcli documentation](https://mctools.readthedocs.io/en/latest/mcli.html).
+
+ We supply mcli as an executable built using pyinstaller under releases
+ for windows systems that don't have python installed.
+ The exe file provided may be buggy or have some weird quirks,
+ so it is recommended to invoke mcli via python.
  
  # Documentation
  
@@ -121,7 +126,7 @@ if rcon.login("password"):
  If you encounter a bug or any other event that does not seem normal,
  then please open an issue, or email me personally.
  I will be sure to get back to you as soon as possible.
- 
+
  Your feedback and reports are appreciated!
  Your comments and issues are an excellent way to correct issues with mctools.
 
