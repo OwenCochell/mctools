@@ -47,7 +47,7 @@ You can do this like so:
 
     from mctools import PINGClient
 
-    ping = PINGClient('mc.server.net', proto_num=[PROTOCOL NUMBER])
+    ping = PINGClient('mc.server.net', proto_num=PROTOCOL_NUMBER)
 
 This allows PINGClient to emulate certain versions of the Minecraft client. By default, we use protocol number 0,
 which means we are inquiring on which protocol version we should use.
@@ -95,12 +95,12 @@ The contents of the dictionary *should* be in the following format:
         'online': 1,
         'sample': [
             {'id': 'fbf11fd0-5b74-490c-adc4-91febe9de2ae',
-            'name': 'MinecraftPlayer'}]},
-           'message': ''
+            'name': 'MinecraftPlayer'}],
+           'message': ''},
     'time': 0.09879999993245292,
     'version': {
         'name': '1.15.2',
-        'protocol': 578}
+        'protocol': 578},
     'favicon': 'data:image/png;base64,<data>'}
 
 The *description* field is the message of the day.

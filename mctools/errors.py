@@ -39,6 +39,9 @@ class ProtoConnectionClosed(ProtocolError):
         self.message = message  # Explanation of the error
 
 
+# --== RCON Errors: ==--
+
+
 class RCONError(MCToolsError):
 
     """
@@ -106,3 +109,25 @@ class RCONLengthError(RCONError):
 
         self.message = message  # Explanation of error
         self.length = length  # Length of data
+
+
+# --== PING Errors: ==--
+
+
+class PINGError(MCToolsError):
+
+    """
+    Base class for PING errors
+    """
+
+
+class PINGMalformedPacketError(PINGError):
+
+    """
+    Exception raised if the ping packet received is malformed/broken,
+    or not what we were expecting.
+    """
+
+    def __init__(self, message) -> None:
+        
+        self.message = message

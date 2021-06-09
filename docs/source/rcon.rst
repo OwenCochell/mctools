@@ -89,7 +89,7 @@ The function will return the response in string format from the server, formatte
 
 .. note::
 
-    You can disable the authentication check by passing 'no_auth=True' to the command function, which will disable
+    You can disable the authentication check by passing 'no_auth=True'  to the command function, which will disable
     the check for this command. Be aware that if the server refuses to serve you, then a RCONAuthenticationError
     exception will be raised.
 
@@ -108,17 +108,58 @@ The command sent will broadcast "Hello RCON!" to every player on the server.
     when issued over RCON, so this is usually a normal operation. It can also mean that the server doesn't understand
     the command issued.
 
-RCON Packet Fragmentation
-_________________________
+RCON Outgoing Packet length
+___________________________
+
+The RCON Protocol has an outgoing(client to server) packet size limitation of 1460 bytes.
+Taking into account the mandatory information we have to send(request ID, type, padding, ect.),
+the maximum command size that can be sent is 1446 bytes.
+
+This limitation unfortunately has no workaround,
+and is an issue with the RCON protocol, and therefore beyond our control.
+mctools does implement a length check to make sure outgoing packets are not too big.
+
+If an outgoing packet is too big, and the length check is enabled,
+then an 'RCONLengthError' exception will be raised, and the packet will not be sent.
+This ensures that any nasty side effects of going over the outgoing limit will be avoided,
+thus keeping the connection in a stable state.
+
+You can optionally disable the outgoing length check by passing 'length_check=False' to the command method.
+
+.. warning::
+
+    Disabling outgoing length checks is not recommended! Doing so could mess up the state of your client!
+
+Here is an example of disabling outgoing length checks:
+
+.. code-block:: python
+
+    # Lets send a HUGE command:
+    # (Assume 'huge_command' is a string containing a command larger than 1446 bytes) 
+
+    resp = rcon.command(huge_command, length_check=False)
+
+This will prevent the 'RCONLengthError' exception from being raised,
+and mctools will send the large packet normally.
+
+If a large packet is sent to the RCON server, then some nasty things could occur.
+The most likely is that the server will forcefully close the connection,
+although other unsavory events could occur.
+This is why we recommend keeping the outgoing length check enabled.
+
+RCON Incoming Packet Fragmentation
+__________________________________
 
 Sometimes, the RCON server will send fragmented packets.
-This is because RCON has a maximum packet size of 4096 bytes.
-RCONClient will automatically handle packet fragmentation for you.
+This is because RCON has an incoming(server to client) maximum packet size of 4096 bytes.
+RCONClient will automatically handle incoming packet fragmentation for you.
 
-If the packet received is 4096 bytes in length, then we will assume the packet is fragmented.
-We send a junk packet to the server, and read packets until the server acknowledges the junk packet.
-RCON ensures that all packets are sent in the order that they are received, meaning that once the server responds to
-the junk packet, then we can be sure that we have all of the relevant packets.
+If the incoming packet is 4096 bytes in length, then we will assume the packet is fragmented.
+If this is the case, then mctools sends a junk packet to the server, 
+and reads packets until the server acknowledges the junk packet.
+The RCON protocol ensures that all packets are sent in the order that they are received, 
+meaning that once the server responds to the junk packet, 
+then we can be sure that we have all of the relevant packets.
 We then concatenate the packets we received, and return it as one.
 
 However, you can disable the check by passing 'frag_check=False' to the command method.
@@ -135,7 +176,7 @@ Here is an example of disabling RCON packet fragmentation:
 
     resp = rcon.command("help", frag_check=False)
 
-This will return the content of the first 4096 bytes. Any subsequent to 'command' or 'raw_send' will return the rest
+This will return the content of the first 4096 bytes. Any subsequent call to 'command' or 'raw_send' will return the rest
 of the fragmented packets. This means that you will have incomplete content, and subsequent calls will return
 irrelevant information. Unless you have a reason for this, it is recommended to keep packet fragmentation enabled.
 

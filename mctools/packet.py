@@ -2,6 +2,7 @@
 Packet classes to hold RCON and Query data
 """
 
+from typing import Union
 
 from mctools.encoding import RCONEncoder, QUERYEncoder, PINGEncoder
 
@@ -134,15 +135,15 @@ class QUERYPacket(BasePacket):
     :param data_type: What type of data we contain
     :type data_type: str
     :param data: Data from the Query server
-    :type data: str
+    :type data: dict
     """
 
-    def __init__(self, reqtype, reqid, chall, data_type, data=None):
+    def __init__(self, reqtype, reqid, chall, data_type, data: dict=None):
 
         self.reqtype = reqtype  # Type of Query packet
         self.reqid = reqid  # Request ID of the Query packet
         self.chall = chall  # Challenge token from the Query server
-        self.data = data  # Data from the Query server
+        self.data: dict = data if data is not None else {}  # Data from the Query server
         self.data_type = data_type  # Determining what kind of data we contain
 
     @classmethod
@@ -215,7 +216,7 @@ class PINGPacket(BasePacket):
     :param packet_type: Type of packet we are working with
     :type packet_type: str
     :param data: Ping data from Minecraft server
-    :type data: str, None
+    :type data: dict, None
     :param proto: Protocol Version used
     :type proto: str, None
     :param host: Hostname of the Minecraft server
@@ -224,12 +225,12 @@ class PINGPacket(BasePacket):
     :type port: int
     """
 
-    def __init__(self, pingnum, packet_type, data=None, proto=None, host=None, port=0):
+    def __init__(self, pingnum, packet_type, data: dict=None, proto=None, host=None, port=0):
 
         self.proto = proto  # Protocol version
         self.hostname = host  # Hostname of the Minecraft server
         self.port = port  # Port of the Minecraft server
-        self.data = data  # Ping data from Minecraft server
+        self.data: dict = data if data is not None else {}  # Ping data from Minecraft server
         self.pingnum = pingnum  # Number to use for ping operations
         self.packet_type = packet_type  # Type of packet we are working with
 

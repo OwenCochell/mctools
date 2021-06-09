@@ -6,7 +6,9 @@ Encoding/Decoding Tools for RCON and Query.
 import struct
 import json
 
-from mctools.errors import RCONMalformedPacketError
+from typing import Tuple, Union
+
+from mctools.errors import RCONMalformedPacketError, PINGMalformedPacketError
 
 
 MAP = {''}
@@ -326,7 +328,7 @@ class PINGEncoder(BaseEncoder):
         return byts
 
     @staticmethod
-    def decode(byts):
+    def decode(byts) -> Tuple[dict, None, str]:
 
         """
         Decodes a ping packet.
@@ -355,19 +357,22 @@ class PINGEncoder(BaseEncoder):
 
             # Working with some other packet type:
 
-            return None, None, "pong"
+            return {}, None, "pong"
+
+        raise PINGMalformedPacketError("Invalid packet type! Must be 1 or 0, not {}!".format(pack_type))
 
     @staticmethod
-    def encode_varint(num):
+    def encode_varint(num: int) -> bytes:
 
         """
         Encodes a number into varint bytes.
 
         :param num: Number to encode
+        :type num: int
         :return: Bytes
         """
 
-        byts = b''
+        byts: bytes = b''
         remaining = num
 
         # Iterating over the content, and doing the necessary bitwise stuff
@@ -378,14 +383,16 @@ class PINGEncoder(BaseEncoder):
 
                 # Found our stuff, exit
 
-                byts = byts + struct.pack("!B", remaining)
-                return byts
+                break
 
             byts = byts + struct.pack("!B", remaining & 0x7F | 0x80)
             remaining >>= 7
 
+        byts = byts + struct.pack("!B", remaining)
+        return byts
+
     @staticmethod
-    def decode_varint(byts):
+    def decode_varint(byts) -> Tuple[int, int]:
 
         """
         Decodes varint bytes into an integer.
@@ -415,7 +422,7 @@ class PINGEncoder(BaseEncoder):
         return result, b + 1
 
     @staticmethod
-    def decode_sock(sock):
+    def decode_sock(sock) -> int:
 
         """
         Decodes a var(int/long) of variable length or value.

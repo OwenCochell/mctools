@@ -137,7 +137,7 @@ The *plugins* filed contains a list of plugins used.
 This is not used by the vanilla server, however community servers
 such as Bukkit and Spigot use this value. Most servers follow this format:
 
-.. code-block:: python
+.. code-block::
 
     [SERVER_MOD_NAME[: PLUGIN_NAME(; PLUGIN_NAME...)]]
 

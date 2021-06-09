@@ -18,6 +18,12 @@ class BaseProtocol(object):
     Every protocol instance should inherit this class!
     """
 
+    def __init__(self) -> None:
+        
+        # Dummy init, primarily meant to specify the socket parameter:
+
+        self.sock: socket.socket
+
     def start(self):
 
         """
@@ -191,13 +197,19 @@ class RCONProtocol(BaseProtocol):
 
         self.connected = False
 
-    def send(self, pack):
+    def send(self, pack, length_check=False):
 
         """
         Sends a packet to the RCON server.
 
         :param pack: RCON Packet
         :type pack: RCONPacket
+        :param length_check: Boolean determining if we should check packet length
+        :type length_check: bool
+
+        .. versionadded:: 1.1.2
+
+        The 'length_check' parameter
         """
 
         # Getting encoded packet data:
@@ -206,7 +218,7 @@ class RCONProtocol(BaseProtocol):
 
         # Check if data is too big:
 
-        if len(data) == 1460:
+        if length_check and len(data) >= 1460:
 
             # Too big, raise an exception!
 

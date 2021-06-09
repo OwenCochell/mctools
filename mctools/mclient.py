@@ -9,9 +9,11 @@ Combines the following:
 
 import time
 
-from mctools.protocol import RCONProtocol, QUERYProtocol, PINGProtocol
+from typing import Union
+
+from mctools.protocol import BaseProtocol, RCONProtocol, QUERYProtocol, PINGProtocol
 from mctools.packet import RCONPacket, QUERYPacket, PINGPacket
-from mctools.formattertools import FormatterCollection, DefaultFormatter, QUERYFormatter, PINGFormatter
+from mctools.formattertools import BaseFormatter, FormatterCollection, DefaultFormatter, QUERYFormatter, PINGFormatter
 from mctools.errors import RCONAuthenticationError, RCONMalformedPacketError
 
 
@@ -33,6 +35,13 @@ class BaseClient(object):
     RAW = 0
     REPLACE = 1
     REMOVE = 2
+
+    def __init__(self) -> None:
+        
+        # Dummy init method
+
+        self.proto: BaseProtocol
+        self.formatters: BaseFormatter
 
     def gen_reqid(self):
 
@@ -169,8 +178,8 @@ class RCONClient(BaseClient):
 
     def __init__(self, host, port=25575, reqid=None, format_method=BaseClient.REPLACE, timeout=60):
 
-        self.proto = RCONProtocol(host, port, timeout)  # RCONProtocol, used for communicating with RCON server
-        self.formatters = FormatterCollection()  # Formatters instance, formats text from server
+        self.proto: RCONProtocol = RCONProtocol(host, port, timeout)  # RCONProtocol, used for communicating with RCON server
+        self.formatters: FormatterCollection = FormatterCollection()  # Formatters instance, formats text from server
         self.auth = False  # Value determining if we are authenticated
         self.format = format_method  # Value determining how to format output
 
@@ -210,7 +219,7 @@ class RCONClient(BaseClient):
 
             self.proto.stop()
 
-    def is_connected(self):
+    def is_connected(self) -> bool:
 
         """
         Determines if we are connected.
@@ -221,7 +230,7 @@ class RCONClient(BaseClient):
 
         return self.proto.connected
 
-    def is_authenticated(self):
+    def is_authenticated(self) -> bool:
 
         """
         Determines if we are authenticated.
@@ -232,7 +241,7 @@ class RCONClient(BaseClient):
 
         return self.auth
 
-    def raw_send(self, reqtype, payload, frag_check=True):
+    def raw_send(self, reqtype: int, payload: str, frag_check: bool=True, length_check: bool=True) -> RCONPacket:
 
         """
         Creates a RCON packet based off the following parameters and sends it.
@@ -242,6 +251,10 @@ class RCONClient(BaseClient):
         If this is the case, then we send a junk packet, and we keep reading packets until the server
         acknowledges the junk packet. This operation can take some time depending on network speed,
         so we offer the option to disable this feature, with the risk that their might be stability issues.
+
+        We also check if the packet being sent is too big, and raise an exception of this is the case.
+        This can be disabled by passing False to the 'length_check' parameter,
+        although this is not recommended.
 
         .. warning:: Use this function at you own risk! You should really call the high level functions,
             as not doing so could mess up the state/connection of the client.
@@ -255,6 +268,11 @@ class RCONClient(BaseClient):
 
         .. warning:: Disabling fragmentation checks could lead to instability! Do so at your own risk!
 
+        :param length_check: Determines if we should check for outgoing packet length
+        :type length_check: bool
+
+        .. warning:: Disabling legnth checks could lead to instability! Do so at your own risk!
+
         :return: RCONPacket containing response from server
         :rtype: RCONPacket
         :raises:
@@ -264,6 +282,10 @@ class RCONClient(BaseClient):
         .. versionadded:: 1.1.0
 
         The 'frag_check' parameter
+
+        .. versionadded:: 1.1.2
+
+        The 'length_check' parameter
         """
 
         if not self.is_connected():
@@ -274,7 +296,7 @@ class RCONClient(BaseClient):
 
         # Sending packet:
 
-        self.proto.send(RCONPacket(self.reqid, reqtype, payload))
+        self.proto.send(RCONPacket(self.reqid, reqtype, payload), length_check=length_check)
 
         # Receiving response packet:
 
@@ -381,7 +403,7 @@ class RCONClient(BaseClient):
 
         return self.login(password)
 
-    def command(self, com, check_auth=True, format_method=None, return_packet=False, frag_check=True):
+    def command(self, com: str, check_auth: bool=True, format_method: int=None, return_packet: bool=False, frag_check: bool=True, length_check: bool=True) -> Union[RCONPacket, str]:
 
         """
         Sends a command to the RCON server and gets a response.
@@ -408,6 +430,14 @@ class RCONClient(BaseClient):
                 Do so at your own risk!
 
         :type frag_check: bool
+        :param length_check: Determines if we should check and handel outgoing packet length
+
+            .. warning::
+
+                Disabling length checks could lead to instability!
+                Do so at your own risk!
+    
+        :type legnth_check: bool
         :return: Response text from server
         :rtype: str, RCONPacket
         :raises:
@@ -415,10 +445,15 @@ class RCONClient(BaseClient):
             and authentication checking is enabled. We also raise this if the server refuses to serve us,
             regardless of weather auth checking is enabled.
             RCONMalformedPacketError: If the packet we received is broken or is not the correct packet.
+            RCONLengthError: If the outgoing packet is larger than 1460 bytes
 
         .. versionadded:: 1.1.0
 
         The 'check_auth', 'format_method', 'return_packet', and 'frag_check' parameters
+
+        .. versionadded:: 1.1.2
+
+        The 'length_check' parameter
         """
 
         # Checking authentication status:
@@ -530,10 +565,10 @@ class QUERYClient(BaseClient):
     :type timeout: int
     """
 
-    def __init__(self, host, port=25565, reqid=None, format_method=BaseClient.REPLACE, timeout=60):
+    def __init__(self, host: str, port: int=25565, reqid: int=None, format_method: int=BaseClient.REPLACE, timeout: int=60):
 
-        self.proto = QUERYProtocol(host, port, timeout)  # Query protocol instance
-        self.formatters = FormatterCollection()  # Formatters instance
+        self.proto: QUERYProtocol = QUERYProtocol(host, port, timeout)  # Query protocol instance
+        self.formatters: FormatterCollection = FormatterCollection()  # Formatters instance
         self.format = format_method  # Format type to use
 
         self.reqid = self.gen_reqid() if reqid is None else int(reqid)
@@ -566,7 +601,7 @@ class QUERYClient(BaseClient):
 
             self.proto.stop()
 
-    def is_connected(self):
+    def is_connected(self) -> bool:
 
         """
         Determines if we are connected.
@@ -578,7 +613,7 @@ class QUERYClient(BaseClient):
 
         return self.proto.started
 
-    def raw_send(self, reqtype, chall, packet_type):
+    def raw_send(self, reqtype: int, chall: Union[str, None], packet_type: str) -> QUERYPacket:
 
         """
         Creates a packet from the given arguments and sends it.
@@ -604,7 +639,7 @@ class QUERYClient(BaseClient):
 
         return pack
 
-    def get_challenge(self):
+    def get_challenge(self) -> QUERYPacket:
 
         """
         Gets the challenge token from the Query server.
@@ -623,7 +658,7 @@ class QUERYClient(BaseClient):
 
         return pack
 
-    def get_basic_stats(self, format_method=None, return_packet=False):
+    def get_basic_stats(self, format_method: int=None, return_packet: bool=False) -> Union[dict, QUERYPacket]:
 
         """
         Gets basic stats from the Query server.
@@ -633,8 +668,8 @@ class QUERYClient(BaseClient):
         :type format_method: int
         :param return_packet: Determines if we should return the entire packet. If not, return the payload
         :type return_packet: bool
-        :return: Dictionary of basic stats.
-        :rtype: dict
+        :return: Dictionary of basic stats, or QUERYPacket, depending on 'return_packet'.
+        :rtype: dict, QUERYPacket
 
         .. versionadded:: 1.1.0
 
@@ -663,7 +698,7 @@ class QUERYClient(BaseClient):
 
         return pack.data
 
-    def get_full_stats(self, format_method=None, return_packet=False):
+    def get_full_stats(self, format_method: int=None, return_packet: bool=False) -> Union[dict, QUERYPacket]:
 
         """
         Gets full stats from the Query server.
@@ -673,7 +708,7 @@ class QUERYClient(BaseClient):
         :type format_method: int
         :param return_packet: Determines if we should return the entire packet. If not, return the payload
         :type return_packet: bool
-        :return: Dictionary of full stats.
+        :return: Dictionary of full stats, or QUERYPacket, depending on 'return_packet'.
         :rtype: dict
 
         .. versionadded:: 1.1.0
@@ -791,12 +826,12 @@ class PINGClient(BaseClient):
     :type proto_num: int
     """
 
-    def __init__(self, host, port=25565, reqid=None, format_method=BaseClient.REPLACE, timeout=60, proto_num=0):
+    def __init__(self, host: str, port: int=25565, reqid: int=None, format_method: int=BaseClient.REPLACE, timeout: int=60, proto_num: int=0):
 
-        self.proto = PINGProtocol(host, port, timeout)
+        self.proto: PINGProtocol = PINGProtocol(host, port, timeout)
         self.host = host  # Host of the Minecraft server
         self.port = int(port)  # Port of the Minecraft server
-        self.formatters = FormatterCollection()  # Formatters method
+        self.formatters: FormatterCollection = FormatterCollection()  # Formatters method
         self.format = format_method  # Formatting method to use
         self.protonum = proto_num  # Protocol number we are using - 0 means we are using the latest
 
@@ -829,7 +864,7 @@ class PINGClient(BaseClient):
 
             self.proto.stop()
 
-    def is_connected(self):
+    def is_connected(self) -> bool:
 
         """
         Determines if we are connected.
@@ -840,7 +875,7 @@ class PINGClient(BaseClient):
 
         return self.proto.connected
 
-    def raw_send(self, pingnum, packet_type, proto=None, host=None, port=0, noread=False):
+    def raw_send(self, pingnum: Union[int, None], packet_type: str, proto: int=None, host: str=None, port: int=0, noread: bool=False) -> PINGPacket:
 
         """
         Creates a PingPacket and sends it to the Minecraft server
@@ -855,15 +890,15 @@ class PINGClient(BaseClient):
         :type host: str
         :param port: Port of the Minecraft server(For handshake only)
         :type port: int
-        :param noread:  Determining if we are expecting a response
+        :param noread: Determining if we are expecting a response
         :type noread: bool
-        :return: PINGPacket
-        :rtype: PINGPacket
+        :return: PINGPacket if noread if False, otherwise None
+        :rtype: PINGPacket, None
         """
 
         if proto is None:
 
-            proto = self.proto
+            proto = self.protonum
 
         if not self.is_connected():
 
@@ -875,7 +910,7 @@ class PINGClient(BaseClient):
 
         self.proto.send(PINGPacket(pingnum, packet_type, proto=proto, host=host, port=port))
 
-        pack = None
+        pack = PINGPacket(0, 0, None, 0)
 
         if not noread:
 
@@ -919,7 +954,7 @@ class PINGClient(BaseClient):
 
         return pack, total
 
-    def ping(self):
+    def ping(self) -> float:
 
         """
         Pings the Minecraft server and calculates the latency.
@@ -942,7 +977,7 @@ class PINGClient(BaseClient):
 
         return time_elapsed
 
-    def get_stats(self, format_method=None, return_packet=False):
+    def get_stats(self, format_method: int=None, return_packet: bool=False) -> Union[dict, PINGPacket]:
 
         """
         Gets stats from the Minecraft server.
@@ -952,8 +987,8 @@ class PINGClient(BaseClient):
         :type format_method: int
         :param return_packet: Determines if we should return the entire packet. If not, return the payload
         :type return_packet: bool
-        :return: Dictionary containing stats.
-        :rtype: dict
+        :return: Dictionary containing stats, or PINGPacket depending on 'return_packet'
+        :rtype: dict, PINGPacket
 
         .. versionadded:: 1.1.0
 

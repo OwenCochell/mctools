@@ -12,17 +12,19 @@
 #
 import os
 import sys
+
 sys.path.insert(0, os.path.abspath('../..'))
 
+import mctools
 
 # -- Project information -----------------------------------------------------
 
 project = 'Minecraft-Connection-Tools'
-copyright = '2020, Owen Cochell'
+copyright = '2021, Owen Cochell'
 author = 'Owen Cochell'
 
 # The full version, including alpha/beta/rc tags
-release = '1.1.0'
+release = mctools.__version__
 
 
 # -- General configuration ---------------------------------------------------
@@ -58,7 +60,7 @@ html_theme_options = {'description': 'Tools for interacting with Minecraft serve
                       'github_user': 'Owen-Cochell',
                       'github_repo': 'mctools',
                       'github_button': True,
-                      'github_type': 'watch',
+                      'github_type': 'star',
                       'extra_nav_links': {
                           'Github Page': 'https://github.com/Owen-Cochell/mctools',
                           'PyPi Page': 'https://pypi.org/project/mctools/',

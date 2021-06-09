@@ -116,6 +116,15 @@ if rcon.login("password"):
  
  Be sure to also check out the [mctools PyPi page](https://pypi.org/project/mctools/) for more information.
  
+ # Bug Reports
+
+ If you encounter a bug or any other event that does not seem normal,
+ then please open an issue, or email me personally.
+ I will be sure to get back to you as soon as possible.
+ 
+ Your feedback and reports are appreciated!
+ Your comments and issues are an excellent way to correct issues with mctools.
+
  # Contributing
  
  Pull requests are welcome and encouraged :) ! If you want to see a feature in mctools, a PR will be the quickest 
@@ -126,6 +135,18 @@ if rcon.login("password"):
  
  # Changelog
  
+ ## 1.1.2
+
+ Fixed an issue where RCON command size handling was broken.
+ Before, the remote server would kill the connection if a command is too large(Bigger than 1460 bytes).
+ We now raise a new exception, 'RCONLengthError' and refuse to send the packet if the command is too big,
+ thus keeping the connection alive. You can optionally disable this check, although this is not recommended.
+
+ The documentation has also been updated to make this limitation more clear,
+ as well as correcting some minor errors, mostly correcting examples in the formatting documentation.
+
+ We also added some type hinting, as some IDEs were complaining about type mismatches.
+
  ## 1.1.1
 
  Fixed an issue where clients hang when the connection is closed by the remote host.

@@ -23,6 +23,7 @@ __pycache__/
 # Python distribution archive directory/PyInstaller spec files
 
 dist/
+build/
 *.spec
 *.egg-info
 
@@ -34,3 +35,7 @@ dist/
 
 docs/build/
 docs/source/_build
+
+# General dummy files:
+
+test.py

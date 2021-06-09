@@ -146,22 +146,22 @@ Here is an example of a description in ChatObject notation:
 
         {'extra': [{'bold': True,
                     'color': 'yellow',
-                     'text': 'This is bold and yellow!'},
+                    'text': 'This is bold and yellow!'},
 
                     {'color': 'gold',
-                    'text': ' Just gold. New line!\n'},
+                     'text': ' Just gold. New line!\n'},
 
                     {'color': 'white',
-                    'italics': True,
-                    'text': 'We are on a new line, '},
+                     'italics': True,
+                     'text': 'We are on a new line, '},
 
                     {'color': 'green',
-                    'text': 'and we love the color green.'},
+                     'text': 'and we love the color green.'},
 
                     {'color': 'white',
-                    'text': '.'}],
+                     'text': '.'}]},
 
-        'text': ''},
+        'text': ''}
 
 As you can see, this makes reading and parsing the content difficult. ChatObjectFormatter fixes this problem
 by converting the dictionary into a single string, which makes reading and parsing the data much easier.
@@ -177,7 +177,7 @@ Have a look at this example sample player list:
 
 .. code-block:: python
 
-    'players': {'max': 5000,
+    {'players': {'max': 5000,
              'online': 723,
              'sample': [{'id': '00000000-0000-0000-0000-000000000000',
                          'name': 'We are a server.'},
@@ -194,7 +194,7 @@ Have a look at this example sample player list:
                         {'id': '00000000-0000-0000-0000-000000000000',
                          'name': 'Here is one of them:'},
                         {'id': '2ef8ad56-ec35-46e7-b90c-8172386d3fe7',
-                        'name': 'MinecraftPLayer1'}]}
+                        'name': 'MinecraftPLayer1'}]}}
 
 If you look, there is a message encoded in this sample list, with one valid player.
 The message has a null UUID, which is how SampleDescriptionFormatter determines if a user list is actually
@@ -204,11 +204,11 @@ After the formatting operation is complete, the *player* sub-dictionary will loo
 
 .. code-block:: python
 
-    'players': {'max': 5000,
+    {'players': {'max': 5000,
              'online': 723,
              'sample': [{'id': '2ef8ad56-ec35-46e7-b90c-8172386d3fe7',
                         'name': 'MinecraftPLayer1'}],
-             'message': 'We are a server.\n\nCheck out our Twitter!\n\nWe have really great players!\n\nHere is one of them:'}
+             'message': 'We are a server.\n\nCheck out our Twitter!\n\nWe have really great players!\n\nHere is one of them:'}}
 
 Now, the sample only contains valid players, and the message is stored under a separate key named 'message'.
 This allows us to accurately determine who is really playing, and view the message with no extra processing.
@@ -330,7 +330,7 @@ get
 This will return the list of formatters used by FormatterCollection. The information on a formatter is stored in a
 sublist with the following format:
 
-.. code-block:: python
+.. code-block::
 
     [Formatter Instance,
     Commands to match,

@@ -21,7 +21,7 @@ This section defines general usage for mcli.py
     However, if you downloaded the source code or the source distribution without installing,
     the you will call mcli as a python file:
 
-    .. code-block:: python
+    .. code-block::
 
         python3 mcli.py [arguments]
 
@@ -226,16 +226,16 @@ Screenshots
 
 Here are some screenshots of mcli in action:
 
-RCON Usage
-----------
+RCON
+----
 
 Interactive RCON session
 
 .. image:: rcon.png
     :alt: rcon screenshot
 
-Query usage
------------
+Query
+------
 
 Fetching full statistics via Query
 
@@ -243,8 +243,8 @@ Fetching full statistics via Query
     :alt: query screenshot
     :height: 300px
 
-Ping usage
-----------
+Ping 
+-----
 
 Pinging Minecraft server and fetching statistics
 
