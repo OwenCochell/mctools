@@ -5,7 +5,6 @@ Exception objects for mctools.
 
 
 class MCToolsError(Exception):
-
     """
     Base class for mctools exceptions.
     """
@@ -14,7 +13,6 @@ class MCToolsError(Exception):
 
 
 class ProtocolError(MCToolsError):
-
     """
     Base class for protocol errors.
 
@@ -25,7 +23,6 @@ class ProtocolError(MCToolsError):
 
 
 class ProtoConnectionClosed(ProtocolError):
-
     """
     Exception raised when the connection is closed by the socket we are connected to.
 
@@ -43,7 +40,6 @@ class ProtoConnectionClosed(ProtocolError):
 
 
 class RCONError(MCToolsError):
-
     """
     Base class for RCON errors.
     """
@@ -52,7 +48,6 @@ class RCONError(MCToolsError):
 
 
 class RCONAuthenticationError(RCONError):
-
     """
     Exception raised when user is not authenticated to the RCON server.
     This is raised when a user tries to send a RCON command,
@@ -70,7 +65,6 @@ class RCONAuthenticationError(RCONError):
 
 
 class RCONMalformedPacketError(RCONError):
-
     """
     Exception raised if the packet we received is malformed/broken,
     or not what we were expecting.
@@ -85,7 +79,6 @@ class RCONMalformedPacketError(RCONError):
 
 
 class RCONCommunicationError(RCONError):
-
     """
     Exception raised if the client has trouble communicating with the RCON server.
     For example, if we don't receive any information when we want a packet.
@@ -100,7 +93,6 @@ class RCONCommunicationError(RCONError):
 
 
 class RCONLengthError(RCONError):
-
     """
     Exception raised if the client attempts to send a packet that is too big, greater than length 1460.
     """
@@ -115,14 +107,12 @@ class RCONLengthError(RCONError):
 
 
 class PINGError(MCToolsError):
-
     """
     Base class for PING errors
     """
 
 
 class PINGMalformedPacketError(PINGError):
-
     """
     Exception raised if the ping packet received is malformed/broken,
     or not what we were expecting.

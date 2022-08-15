@@ -1,3 +1,5 @@
+.. _client_tutorial:
+
 ===============
 Client Tutorial
 ===============
@@ -82,10 +84,17 @@ It is HIGHLY recommended to call this when you are done communicating with the s
 Not doing so could cause problems server side. Protocol objects will attempt to gracefully close the
 connection when they are deleted, but this does not always work.
 
+You can stop the client multiple times without any issues,
+and stopping a client that is already stopped will have no effect.
+
 .. note::
 
-    Due to the design of python sockets, once a client has been stopped, it can't be started again.
-    You will have to create a new instance if you stop your current one.
+    As of mctools version 1.2.0, client objects can be started again after they have been stopped.
+
+    However, in older versions of mctools, clients can not be started again after they have been stopped.
+    This means that if you stop a client, it will be completely unusable.
+    This is due to the design of python sockets, as sockets can't be re-used if closed.
+    In this case, you will have to create a new client if you stop your current one.
 
 raw_send
 --------
@@ -161,11 +170,9 @@ You may specify your own request ID by passing an integer to the 'reqid' paramet
 format_method
 -------------
 
-.. _here: https://minecraft.gamepedia.com/Formatting_codes
-
 This parameter specifies how (or how not) packets should be formatted.
 Minecraft has a special formatting convention that allows users to add custom
-colors or effects to text. Info on that can be found here_.
+colors or effects to text. Info on that can be found `here <https://minecraft.gamepedia.com/Formatting_codes>`_.
 
 Sometimes, often with the use of extensive plugins,
 there can be many format characters within the received data,
@@ -205,7 +212,7 @@ Every client method where 'formattable' information is fetched has a
 'format_method' parameter that you can use to set a 'one time' formatting mode.
 If not specified, then the global formatting type will be used.
 
-For more information on formatters, please see the `Formatter Tutorial. <format.html>`_
+For more information on formatters, please see the :ref:`Formatter Tutorial. <formatter_tutorial>`
 
 timeout
 -------
@@ -270,7 +277,7 @@ List of 'ProtocolErrors':
 
     1. ProtocolError - Base exception for all protocol errors
     2. ProtoConnectionClosed - Raised when the connection is closed by the remote host
-   
+
 Here is an example of importing and handling these exceptions:
 
 .. code-block:: python

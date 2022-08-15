@@ -16,7 +16,7 @@ This allows you to do the following:
  - Get the message of the day
  - Get currently installed plugins
  - And much more!
- 
+
 All of this can be achieved using simple, intuitive calls to mctools. mctools does all the heavy lifting for you!
 Also, mctools has no external dependencies(Unless you are a windows user and need color support),
 and only uses the python standard library. Just download and go!
@@ -45,23 +45,23 @@ if rcon.login("password"):
  # Installation 
  
  You can install mctools via pip:
- 
+
     $ pip install mctools
-    
+
  If you are a windows user and want color support, then install mctools like so:
- 
+
     $ pip install mctools[color]
-    
+
  For more information on installing mctools, check out the instillation section in our 
  [documentation](https://mctools.readthedocs.io/en/latest/install.html).
- 
+
  # Formatting
- 
+
  mctools has support for handling Minecraft formatting codes. 
  You can decide weather mctools replaces formatting characters with intended values, removes them, or leaves them be.
- 
+
  For example, lets say you received the following content during a rcon session:
- 
+
     §e--------- §fHelp: Index (1/40) §e--------------------
     §7Use /help [n] to get page n of help.
     §6Aliases: §fLists command aliases
@@ -72,10 +72,10 @@ if rcon.login("password"):
     §6Minecraft: §fAll commands for Minecraft
     §6Vault: §fAll commands for Vault
     §6WorldEdit: §fAll commands for WorldEdit
-    
+
  As you can see, this text is somewhat hard to read. If you told mctools to remove the formatting characters, 
  then the output will look like this:
- 
+
     --------- Help: Index (1/40) --------------------
     Use /help [n] to get page n of help.
     Aliases: Lists command aliases
@@ -86,26 +86,26 @@ if rcon.login("password"):
     Minecraft: All commands for Minecraft
     Vault: All commands for Vault
     WorldEdit: All commands for WorldEdit
- 
+
  Much easier to read and process. mctools handles this operation automatically, so you don't have to.
  mctools also handles situations where content is sent in ChatObject notation, and can extract messages from the 
  player sample list.
- 
+
  To learn more about formatters, and how to create your own, 
  then please check out the [formatting documentation](https://mctools.readthedocs.io/en/latest/format.html).
- 
+
  # MCLI - mctools Command Line Interface
- 
+
  mctools is shipped with a CLI front end called mcli, which you can use to start rcon sessions, get stats
  via query/ping, check if a Minecraft server is up, ect. 
- 
+
  After installing mctools(through pip or setuptools), you can invoke mcli like so:
  
     $ mcli --help
-    
+
  You can also run mcli.py(which is located in the parent directory) if you downloaded the source code and did not
  install via pip/setuptools.
-    
+
  The above command will generate the help menu for mcli. To learn more about mcli, please check out the 
  [mcli documentation](https://mctools.readthedocs.io/en/latest/mcli.html).
 
@@ -113,14 +113,14 @@ if rcon.login("password"):
  for windows systems that don't have python installed.
  The exe file provided may be buggy or have some weird quirks,
  so it is recommended to invoke mcli via python.
- 
+
  # Documentation
- 
+
  mctools has an extensive documentation. It contains tutorials, the API reference, and best practice recommendations.
  You can find the [documentation here](https://mctools.readthedocs.io/).
- 
+
  Be sure to also check out the [mctools PyPi page](https://pypi.org/project/mctools/) for more information.
- 
+
  # Bug Reports
 
  If you encounter a bug or any other event that does not seem normal,
@@ -134,12 +134,24 @@ if rcon.login("password"):
  
  Pull requests are welcome and encouraged :) ! If you want to see a feature in mctools, a PR will be the quickest 
  way to get it included. Feel free to email me or open an issue if you have any problems.
- 
+
  If you are interested in helping in the development of mctools, then send me an email, and we can get talking!
  Believe me, there is plenty of work that needs to be done. More help would be greatly appreciated!
- 
+
  # Changelog
- 
+
+## 1.2.0
+
+ Clients (of any type!) can now be started after being stopped,
+ so creating a new client after stopping it is no longer necessary.
+
+ The PINGClient will now auto stop itself after each operation.
+
+ Fixed a bug where the QUERYClient did not auto-start itself.
+
+ The documentation was updated to reflect these changes, and it now explains
+stopping/starting clients a lot better.
+
  ## 1.1.2
 
  Fixed an issue where RCON command size handling was broken.
@@ -195,18 +207,18 @@ if rcon.login("password"):
  (You can technically do this as of now, but I want the library to invoke and handle this process) for a more
  secure RCON experience
  - Unit tests for mctools
-    
+
  I have some of these complete as of now, but I wanted to push out the big bug fixes and minor stuff before 
  I finish creating and refining the features, as they may take me some time to implement.
- 
+
  All of these features will be completely optional, and they will all be backwards compatible.
  So if you like the library as it is now, then you can completely ignore these new features.
- 
+
  The documentation has been updated to reflect these changes.
- 
+
  # Conclusion
- 
+
  mctools offers a pythonic, reliable way to interact with Minecraft servers, without being too complicated.
  Please check the documentation for more information. More features (hopefully) coming soon!
- 
+
  Thank you for reading!

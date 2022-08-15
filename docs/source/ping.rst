@@ -55,7 +55,7 @@ You can find a list of protocol numbers and their versions `here <https://wiki.v
 
 .. note::
 
-    For more information on general client configuration and instantiation, see the `client tutorial. <client.html>`_
+    For more information on general client configuration and instantiation, see the :ref:`client tutorial. <client_tutorial>`
 
 Pinging the server
 ------------------
@@ -63,7 +63,13 @@ Pinging the server
 .. warning::
 
     The server will automatically close the connection after you ping the server or fetch statistics.
-    This means you must create a new PINGClient after the operation is complete.
+
+    If you are running mctools version 1.2.0 or above,
+    the PINGClient will be automatically stopped for you after each operation.
+    The PINGClient can then be started again and used as expected.
+
+    However, older versions of mctools do not support client restarting,
+    and you will have to create a new PINGClient instance.
 
 Once you have created your PINGClient, you can ping the server:
 
@@ -140,14 +146,19 @@ You can read more about the ping formatters and how they handle data in the `For
 Stopping the instance
 ---------------------
 
-It is recommended to stop the client when it is done being used:
+As of mctools version 1.2.0, 
+the PINGClient is automatically stopped for you after each operation.
+
+Still, it is recommended to stop the client anyway when it is done being used:
 
 .. code-block:: python
 
     ping.stop()
 
-This will stop the underlying TCP connection to the Minecraft server.
-It is HIGHLY recommended to stop the instance, as not doing so could lead to problems server-side.
+This will stop the underlying TCP connection to the Minecraft server, if their still is a connection.
+Again, most of the time it is not necessary to stop the client as it is done for you.
+You should still do so, as it can ensure that the client is stopped in case it did not automatically stop itself.
+It also helps readability, and allows you to explicitly state when you are done communicating over a network.
 
 Conclusion
 ==========

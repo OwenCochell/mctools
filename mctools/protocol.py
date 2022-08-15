@@ -12,7 +12,6 @@ from mctools.errors import RCONCommunicationError, RCONLengthError, ProtoConnect
 
 
 class BaseProtocol(object):
-
     """
     Parent Class for protocol implementations.
     Every protocol instance should inherit this class!
@@ -25,7 +24,6 @@ class BaseProtocol(object):
         self.sock: socket.socket
 
     def start(self):
-
         """
         Method to start the connection to remote entity.
         This raises a NotImplementedErrorException, as it should be overridden in the child class.
@@ -34,7 +32,6 @@ class BaseProtocol(object):
         raise NotImplementedError("Override this method in child class!")
 
     def stop(self):
-
         """
         Method to stop the connection to remote entity.
         This raises a NotImplementedErrorException, as it should be overridden in the child class.
@@ -43,7 +40,6 @@ class BaseProtocol(object):
         raise NotImplementedError("Override this method in child class!")
 
     def send(self, data):
-
         """
         Method to send data to remote entity, data type is arbitrary.
         This raises a NotImplementedErrorException, as it should be overridden in the child class.
@@ -54,7 +50,6 @@ class BaseProtocol(object):
         raise NotImplementedError("Override this method in child class!")
 
     def read(self):
-
         """
         Method to receive data from remote entity
         This raises a NotImplementedErrorException, as it should be overridden in the child class.
@@ -65,7 +60,6 @@ class BaseProtocol(object):
         raise NotImplementedError("Override this method in child class!")
 
     def read_tcp(self, length):
-
         """
         Reads data over the TCP protocol.
 
@@ -90,14 +84,13 @@ class BaseProtocol(object):
 
                 self.stop()
 
-                # Raise the 'ConnectionClosed' excpetion:
+                # Raise the 'ConnectionClosed' exception:
 
                 raise ProtoConnectionClosed("Connection closed by remote host!")
 
         return byts
 
     def write_tcp(self, byts):
-
         """
         Writes data over the TCP protocol.
 
@@ -108,7 +101,6 @@ class BaseProtocol(object):
         return self.sock.sendall(byts)
 
     def read_udp(self):
-
         """
         Reads data over the UDP protocol.
 
@@ -118,7 +110,6 @@ class BaseProtocol(object):
         return self.sock.recvfrom(1024)
 
     def write_udp(self, byts, host, port):
-
         """
         Writes data over the UPD protocol.
 
@@ -131,7 +122,6 @@ class BaseProtocol(object):
         self.sock.sendto(byts, (host, port))
 
     def set_timeout(self, timeout):
-
         """
         Sets the timeout value for the underlying socket object.
 
@@ -143,9 +133,21 @@ class BaseProtocol(object):
 
         self.sock.settimeout(timeout)
 
+    def __del__(self):
+        """
+        Attempts to close the socket:
+        """
+
+        try:
+
+            self.sock.close()
+
+        except Exception:
+
+            pass
+
 
 class RCONProtocol(BaseProtocol):
-
     """
     Protocol implementation fot RCON - Uses TCP sockets.
 
@@ -161,7 +163,6 @@ class RCONProtocol(BaseProtocol):
 
         self.host = host  # Host of the RCON server
         self.port = int(port)  # Port of the RCON server
-        self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)  # Creating an ip4 TCP socket
         self.LOGIN = 3  # Packet type used for logging in
         self.COMMAND = 2  # Packet type for issuing a command
         self.RESPONSE = 0  # Packet type for response
@@ -169,10 +170,7 @@ class RCONProtocol(BaseProtocol):
         self.connected = False  # Value determining if we are connected
         self.timeout = timeout  # Global timeout value
 
-        self.sock.settimeout(timeout)  # Setting timeout value for socket
-
     def start(self):
-
         """
         Starts the connection to the RCON server.
         """
@@ -183,12 +181,19 @@ class RCONProtocol(BaseProtocol):
 
             return
 
+        # Create an ip4 tcp socket:
+
+        self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
+        # Set the timeout:
+
+        self.sock.settimeout(self.timeout)
+
         self.sock.connect((self.host, self.port))
 
         self.connected = True
 
     def stop(self):
-
         """
         Stops the connection to the RCON server.
         """
@@ -198,7 +203,6 @@ class RCONProtocol(BaseProtocol):
         self.connected = False
 
     def send(self, pack, length_check=False):
-
         """
         Sends a packet to the RCON server.
 
@@ -229,7 +233,6 @@ class RCONProtocol(BaseProtocol):
         self.write_tcp(data)
 
     def read(self):
-
         """
         Gets a RCON packet from the RCON server.
 
@@ -257,23 +260,8 @@ class RCONProtocol(BaseProtocol):
 
         return pack
 
-    def __del__(self):
-
-        """
-        Attempts to close the socket
-        """
-
-        try:
-
-            self.sock.close()
-
-        except Exception:
-
-            pass
-
 
 class QUERYProtocol(BaseProtocol):
-
     """
     Protocol implementation for Query - Uses UDP sockets.
 
@@ -290,21 +278,25 @@ class QUERYProtocol(BaseProtocol):
 
         self.host = host  # Host of the Query server
         self.port = int(port)  # Port of the Query server
-        self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)  # Creating a ip4 UDP socket
         self.started = False  # Determining if we have started communicating with the Query server
-
-        self.sock.settimeout(timeout)  # Setting timeout value for socket
+        self.timeout = timeout
 
     def start(self):
-
         """
         Sets the protocol object as ready to communicate.
         """
 
         self.started = True
+        
+        # Create an ip4 UPD socket:
+
+        self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+
+        # Set the timeout:
+        
+        self.sock.settimeout(self.timeout)  # Setting timeout value for socket
 
     def stop(self):
-
         """
         Sets the protocol object as not ready to communicate.
         """
@@ -312,7 +304,6 @@ class QUERYProtocol(BaseProtocol):
         self.started = False
 
     def send(self, pack):
-
         """
         Sends a packet to the Query server.
 
@@ -329,7 +320,6 @@ class QUERYProtocol(BaseProtocol):
         self.write_udp(byts, self.host, self.port)
 
     def read(self):
-
         """
         Gets a Query packet from the Query server.
 
@@ -347,23 +337,8 @@ class QUERYProtocol(BaseProtocol):
 
         return pack
 
-    def __del__(self):
-
-        """
-        Attempts to close the socket
-        """
-
-        try:
-
-            self.sock.close()
-
-        except:
-
-            pass
-
 
 class PINGProtocol(BaseProtocol):
-
     """
     Protocol implementation for server list ping - uses TCP sockets.
 
@@ -379,16 +354,21 @@ class PINGProtocol(BaseProtocol):
 
         self.host = host  # Host of the Minecraft server
         self.port = int(port)  # Port of the Minecraft server
-        self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)  # Creating an ip4 TCP socket
         self.connected = False  # Value determining if we are connected
-
-        self.sock.settimeout(timeout)  # Setting timeout value for socket
+        self.timeout = timeout
 
     def start(self):
-
         """
         Starts the connection to the Minecraft server.
         """
+
+        # Create an ip4 TCP socket:
+
+        self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
+        # Set the timeout:
+
+        self.sock.settimeout(self.timeout)
 
         # Starting connection
 
@@ -399,7 +379,6 @@ class PINGProtocol(BaseProtocol):
         self.connected = True
 
     def stop(self):
-
         """
         Stopping the connection to the Minecraft server.
         """
@@ -413,7 +392,6 @@ class PINGProtocol(BaseProtocol):
         self.connected = False
 
     def send(self, pack):
-
         """
         Sends a ping packet to the Minecraft server.
 
@@ -430,7 +408,6 @@ class PINGProtocol(BaseProtocol):
         self.write_tcp(byts)
 
     def read(self):
-
         """
         Read data from the Minecraft server and convert it into a PINGPacket.
 
@@ -453,17 +430,3 @@ class PINGProtocol(BaseProtocol):
         pack = PINGPacket.from_bytes(byts)
 
         return pack
-
-    def __del__(self):
-
-        """
-        Attempts to close the socket:
-        """
-
-        try:
-
-            self.sock.close()
-
-        except:
-
-            pass

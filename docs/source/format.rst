@@ -1,3 +1,5 @@
+.. _formatter_tutorial:
+
 ===================
 Formatting Tutorial
 ===================
@@ -350,14 +352,12 @@ If we are cleaning the text, then we will simply remove 'help' from the content.
     from mctools import formattertools
 
     class HelpFormatter(formattertools.BaseFormatter)
-
         """
         A Simple formatter to change some wording on the Minecraft help menu.
         """
 
         @staticmethod
         def format(text):
-
             """
             Replaces 'help' with assistance.
             """
@@ -366,7 +366,6 @@ If we are cleaning the text, then we will simply remove 'help' from the content.
 
         @staticmethod
         def clean(text):
-
             """
             Removes 'help' from the text.
             """

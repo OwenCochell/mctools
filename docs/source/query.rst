@@ -41,7 +41,7 @@ Query can only be used if the server has
 
 .. note::
 
-    For more information on general client configuration and instantiation, see the `client tutorial. <client.html>`_
+    For more information on general client configuration and instantiation, see the :ref:`client tutorial. <client_tutorial>`
 
 Retrieving Statistics
 ---------------------
@@ -148,7 +148,7 @@ Stopping the instance
 
 Due to the `UDP protocol's <https://en.wikipedia.org/wiki/User_Datagram_Protocol>`_ design(The protocol Query uses),
 the client instance does not *need* to be stopped.
-However, we still recommend stopping your client for readability, and so you can be explict as to when your
+However, we still recommend stopping your client for readability, and so you can be explicit as to when your
 program will stop communicating over the network.
 
 Conclusion

@@ -20,7 +20,7 @@ import mctools
 # -- Project information -----------------------------------------------------
 
 project = 'Minecraft-Connection-Tools'
-copyright = '2021, Owen Cochell'
+copyright = '2022, Owen Cochell'
 author = 'Owen Cochell'
 
 # The full version, including alpha/beta/rc tags

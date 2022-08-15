@@ -159,7 +159,6 @@ class BaseClient(object):
 
 
 class RCONClient(BaseClient):
-
     """
     RCON client, allows for user to interact with the Minecraft server via the RCON protocol.
 
@@ -190,7 +189,6 @@ class RCONClient(BaseClient):
         self.formatters.add(DefaultFormatter, '', ignore=[self.formatters.PING, self.formatters.QUERY])
 
     def start(self):
-
         """
         Starts the connection to the RCON server.
         This is called automatically where appropriate,
@@ -204,7 +202,6 @@ class RCONClient(BaseClient):
             self.proto.start()
 
     def stop(self):
-
         """
         Stops the connection to the RCON server.
         This function should always be called when ceasing network communications,
@@ -220,7 +217,6 @@ class RCONClient(BaseClient):
             self.proto.stop()
 
     def is_connected(self) -> bool:
-
         """
         Determines if we are connected.
 
@@ -231,7 +227,6 @@ class RCONClient(BaseClient):
         return self.proto.connected
 
     def is_authenticated(self) -> bool:
-
         """
         Determines if we are authenticated.
 
@@ -242,7 +237,6 @@ class RCONClient(BaseClient):
         return self.auth
 
     def raw_send(self, reqtype: int, payload: str, frag_check: bool=True, length_check: bool=True) -> RCONPacket:
-
         """
         Creates a RCON packet based off the following parameters and sends it.
         This function is used for all networking operations.
@@ -271,7 +265,7 @@ class RCONClient(BaseClient):
         :param length_check: Determines if we should check for outgoing packet length
         :type length_check: bool
 
-        .. warning:: Disabling legnth checks could lead to instability! Do so at your own risk!
+        .. warning:: Disabling length checks could lead to instability! Do so at your own risk!
 
         :return: RCONPacket containing response from server
         :rtype: RCONPacket
@@ -353,7 +347,6 @@ class RCONClient(BaseClient):
         return pack
 
     def login(self, password):
-
         """
         Authenticates with the RCON server using the given password.
         If we are already authenticated, then we simply return True.
@@ -391,7 +384,6 @@ class RCONClient(BaseClient):
         return True
 
     def authenticate(self, password):
-
         """
         Convenience function, does the same thing that 'login' does, authenticates you with the RCON server.
 
@@ -404,7 +396,6 @@ class RCONClient(BaseClient):
         return self.login(password)
 
     def command(self, com: str, check_auth: bool=True, format_method: int=None, return_packet: bool=False, frag_check: bool=True, length_check: bool=True) -> Union[RCONPacket, str]:
-
         """
         Sends a command to the RCON server and gets a response.
 
@@ -483,7 +474,6 @@ class RCONClient(BaseClient):
         return pack.payload
 
     def _format(self, pack, com, format_method=None):
-
         """
         Sends incoming data to the formatter.
 
@@ -521,7 +511,6 @@ class RCONClient(BaseClient):
         return pack
 
     def __enter__(self):
-
         """
         In a context manager.
 
@@ -531,7 +520,6 @@ class RCONClient(BaseClient):
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
-
         """
         Exit the context manager, show any necessary errors as they are important.
 
@@ -549,7 +537,6 @@ class RCONClient(BaseClient):
 
 
 class QUERYClient(BaseClient):
-
     """
     Query client, allows for user to interact with the Minecraft server via the Query protocol.
 
@@ -578,7 +565,6 @@ class QUERYClient(BaseClient):
         self.formatters.add(QUERYFormatter, self.formatters.QUERY)
 
     def start(self):
-
         """
         Starts the Query object. This is called automatically where appropriate,
         so you shouldn't have to worry about calling this.
@@ -589,7 +575,6 @@ class QUERYClient(BaseClient):
             self.proto.start()
 
     def stop(self):
-
         """
         Stops the connection to the Query server.
         In this case, it is not strictly necessary to stop the connection,
@@ -602,7 +587,6 @@ class QUERYClient(BaseClient):
             self.proto.stop()
 
     def is_connected(self) -> bool:
-
         """
         Determines if we are connected.
         (UPD doesn't really work that way, so we simply return if we have been started).
@@ -614,7 +598,6 @@ class QUERYClient(BaseClient):
         return self.proto.started
 
     def raw_send(self, reqtype: int, chall: Union[str, None], packet_type: str) -> QUERYPacket:
-
         """
         Creates a packet from the given arguments and sends it.
         Returns a response.
@@ -629,6 +612,14 @@ class QUERYClient(BaseClient):
         :rtype: QUERYPacket
         """
 
+        # Check if we are connected:
+
+        if not self.is_connected():
+
+            # Start ourselves:
+
+            self.start()
+
         # Sending packet:
 
         self.proto.send(QUERYPacket(reqtype, self.reqid, chall, packet_type))
@@ -640,7 +631,6 @@ class QUERYClient(BaseClient):
         return pack
 
     def get_challenge(self) -> QUERYPacket:
-
         """
         Gets the challenge token from the Query server.
         It is necessary to get a token before every operation,
@@ -659,7 +649,6 @@ class QUERYClient(BaseClient):
         return pack
 
     def get_basic_stats(self, format_method: int=None, return_packet: bool=False) -> Union[dict, QUERYPacket]:
-
         """
         Gets basic stats from the Query server.
 
@@ -699,7 +688,6 @@ class QUERYClient(BaseClient):
         return pack.data
 
     def get_full_stats(self, format_method: int=None, return_packet: bool=False) -> Union[dict, QUERYPacket]:
-
         """
         Gets full stats from the Query server.
 
@@ -739,7 +727,6 @@ class QUERYClient(BaseClient):
         return pack.data
 
     def _format(self, data, format_method=None):
-
         """
         Sends the incoming data to the formatter.
 
@@ -779,7 +766,6 @@ class QUERYClient(BaseClient):
         return data
 
     def __enter__(self):
-
         """
         In a context manager.
 
@@ -789,7 +775,6 @@ class QUERYClient(BaseClient):
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
-
         """
         Exit the context manager, show any errors as they are important.
 
@@ -807,7 +792,6 @@ class QUERYClient(BaseClient):
 
 
 class PINGClient(BaseClient):
-
     """
     Ping client, allows for user to interact with the Minecraft server via the Server List Ping protocol.
 
@@ -842,7 +826,6 @@ class PINGClient(BaseClient):
         self.formatters.add(PINGFormatter, self.formatters.PING)
 
     def start(self):
-
         """
         Starts the connection to the Minecraft server. This is called automatically where appropriate,
         so you shouldn't have to worry about calling this.
@@ -853,7 +836,6 @@ class PINGClient(BaseClient):
             self.proto.start()
 
     def stop(self):
-
         """
         Stops the connection to the Minecraft server.
         This function should always be called when ceasing network communications,
@@ -865,7 +847,6 @@ class PINGClient(BaseClient):
             self.proto.stop()
 
     def is_connected(self) -> bool:
-
         """
         Determines if we are connected.
 
@@ -876,7 +857,6 @@ class PINGClient(BaseClient):
         return self.proto.connected
 
     def raw_send(self, pingnum: Union[int, None], packet_type: str, proto: int=None, host: str=None, port: int=0, noread: bool=False) -> PINGPacket:
-
         """
         Creates a PingPacket and sends it to the Minecraft server
 
@@ -921,7 +901,6 @@ class PINGClient(BaseClient):
         return pack
 
     def _send_handshake(self):
-
         """
         Sends a handshake packet to the server - Starts the conversation.
         """
@@ -931,7 +910,6 @@ class PINGClient(BaseClient):
         self.raw_send(None, "handshake", proto=self.protonum, host=self.host, port=self.port, noread=True)
 
     def _send_ping(self):
-
         """
         Sends a ping packet to the server.
         We send this after we query stats, so the server doesn't have to wait.
@@ -955,9 +933,12 @@ class PINGClient(BaseClient):
         return pack, total
 
     def ping(self) -> float:
-
         """
         Pings the Minecraft server and calculates the latency.
+
+        .. versionadded:: 1.2.0
+        
+        We now automatically stop this client after the operation
 
         :return: Time elapsed(in milliseconds).
         :rtype: float
@@ -975,10 +956,13 @@ class PINGClient(BaseClient):
 
         ping, time_elapsed = self._send_ping()
 
+        # Stop ourselves:
+
+        self.stop()
+
         return time_elapsed
 
     def get_stats(self, format_method: int=None, return_packet: bool=False) -> Union[dict, PINGPacket]:
-
         """
         Gets stats from the Minecraft server.
 
@@ -993,6 +977,10 @@ class PINGClient(BaseClient):
         .. versionadded:: 1.1.0
 
         The 'format_method' and 'return_packet' parameters
+        
+        .. versionadded:: 1.2.0
+        
+        We now automatically stop this client after the operation
         """
 
         # Sending handshake packet:
@@ -1021,12 +1009,15 @@ class PINGClient(BaseClient):
 
             return pack
 
+        # Stop ourselves:
+
+        self.stop()
+
         # Return just the payload
 
         return pack.data
 
     def _format(self, pack, format_method=None):
-
         """
         Sends the incoming data to the formatter.
 
@@ -1067,7 +1058,6 @@ class PINGClient(BaseClient):
         return data
 
     def __enter__(self):
-
         """
         Enter the context manager.
 
@@ -1077,7 +1067,6 @@ class PINGClient(BaseClient):
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
-
         """
         Exit the context manager.
 

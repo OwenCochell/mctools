@@ -40,7 +40,7 @@ RCON can only be used if the server has
 
 .. note::
 
-    For more information on general client configuration and instantiation, see the `client tutorial. <client.html>`_
+    For more information on general client configuration and instantiation, see the :ref:`client tutorial. <client_tutorial>`
 
 Authenticating with the RCON server
 -----------------------------------
@@ -191,11 +191,6 @@ To end the session with the server correctly, do the following:
 
 This will stop the underlying TCP connection to the server.
 It is ALWAYS recommended to stop the instance, as not doing so could cause problems server-side.
-
-.. note::
-
-    Once a RCONClient instance is stopped, it can't be reused/restarted. This is because of the design of
-    Python socket objects. You must create a new RCONClient to interact with the RCON server.
 
 Conclusion
 ==========
