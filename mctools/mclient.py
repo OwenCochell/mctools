@@ -11,7 +11,7 @@ import time
 
 from typing import Union
 
-from mctools.protocol import BaseProtocol, RCONProtocol, QUERYProtocol, PINGProtocol
+from mctools.protocol import BaseProtocol, RCONProtocol, QUERYProtocol, PINGProtocol, DEFAULT_TIMEOUT
 from mctools.packet import RCONPacket, QUERYPacket, PINGPacket
 from mctools.formattertools import BaseFormatter, FormatterCollection, DefaultFormatter, QUERYFormatter, PINGFormatter
 from mctools.errors import RCONAuthenticationError, RCONMalformedPacketError
@@ -175,7 +175,7 @@ class RCONClient(BaseClient):
     :type timeout: int
     """
 
-    def __init__(self, host, port=25575, reqid=None, format_method=BaseClient.REPLACE, timeout=60):
+    def __init__(self, host, port=25575, reqid=None, format_method=BaseClient.REPLACE, timeout=DEFAULT_TIMEOUT):
 
         self.proto: RCONProtocol = RCONProtocol(host, port, timeout)  # RCONProtocol, used for communicating with RCON server
         self.formatters: FormatterCollection = FormatterCollection()  # Formatters instance, formats text from server
@@ -346,7 +346,7 @@ class RCONClient(BaseClient):
 
         return pack
 
-    def login(self, password):
+    def login(self, password) -> bool:
         """
         Authenticates with the RCON server using the given password.
         If we are already authenticated, then we simply return True.
@@ -383,7 +383,7 @@ class RCONClient(BaseClient):
 
         return True
 
-    def authenticate(self, password):
+    def authenticate(self, password) -> bool:
         """
         Convenience function, does the same thing that 'login' does, authenticates you with the RCON server.
 
@@ -421,14 +421,14 @@ class RCONClient(BaseClient):
                 Do so at your own risk!
 
         :type frag_check: bool
-        :param length_check: Determines if we should check and handel outgoing packet length
+        :param length_check: Determines if we should check and handle outgoing packet length
 
             .. warning::
 
                 Disabling length checks could lead to instability!
                 Do so at your own risk!
     
-        :type legnth_check: bool
+        :type length_check: bool
         :return: Response text from server
         :rtype: str, RCONPacket
         :raises:
@@ -457,7 +457,7 @@ class RCONClient(BaseClient):
 
         # Sending command packet:
 
-        pack = self.raw_send(self.proto.COMMAND, com, frag_check=frag_check)
+        pack = self.raw_send(self.proto.COMMAND, com, frag_check=frag_check, length_check=length_check)
 
         # Get the formatted content:
 
@@ -552,7 +552,7 @@ class QUERYClient(BaseClient):
     :type timeout: int
     """
 
-    def __init__(self, host: str, port: int=25565, reqid: int=None, format_method: int=BaseClient.REPLACE, timeout: int=60):
+    def __init__(self, host: str, port: int=25565, reqid: int=None, format_method: int=BaseClient.REPLACE, timeout: int=DEFAULT_TIMEOUT):
 
         self.proto: QUERYProtocol = QUERYProtocol(host, port, timeout)  # Query protocol instance
         self.formatters: FormatterCollection = FormatterCollection()  # Formatters instance
@@ -595,7 +595,7 @@ class QUERYClient(BaseClient):
         :rtype: bool
         """
 
-        return self.proto.started
+        return self.proto.connected
 
     def raw_send(self, reqtype: int, chall: Union[str, None], packet_type: str) -> QUERYPacket:
         """
@@ -810,7 +810,7 @@ class PINGClient(BaseClient):
     :type proto_num: int
     """
 
-    def __init__(self, host: str, port: int=25565, reqid: int=None, format_method: int=BaseClient.REPLACE, timeout: int=60, proto_num: int=0):
+    def __init__(self, host: str, port: int=25565, reqid: int=None, format_method: int=BaseClient.REPLACE, timeout: int=DEFAULT_TIMEOUT, proto_num: int=0):
 
         self.proto: PINGProtocol = PINGProtocol(host, port, timeout)
         self.host = host  # Host of the Minecraft server

@@ -24,6 +24,7 @@ and only uses the python standard library. Just download and go!
 # Example
 
 Send a command to the Minecraft server via rcon:
+
 ```python
 from mctools import RCONClient  # Import the RCONClient
 
@@ -42,6 +43,7 @@ if rcon.login("password"):
 
     resp = rcon.command("broadcast Hello RCON!")
 ```
+
  # Installation 
  
  You can install mctools via pip:
@@ -73,7 +75,7 @@ if rcon.login("password"):
     §6Vault: §fAll commands for Vault
     §6WorldEdit: §fAll commands for WorldEdit
 
- As you can see, this text is somewhat hard to read. If you told mctools to remove the formatting characters, 
+ As you can see, this text is somewhat hard to read. If you told mctools to remove the formatting characters,
  then the output will look like this:
 
     --------- Help: Index (1/40) --------------------
@@ -88,16 +90,16 @@ if rcon.login("password"):
     WorldEdit: All commands for WorldEdit
 
  Much easier to read and process. mctools handles this operation automatically, so you don't have to.
- mctools also handles situations where content is sent in ChatObject notation, and can extract messages from the 
+ mctools also handles situations where content is sent in ChatObject notation, and can extract messages from the
  player sample list.
 
- To learn more about formatters, and how to create your own, 
+ To learn more about formatters, and how to create your own,
  then please check out the [formatting documentation](https://mctools.readthedocs.io/en/latest/format.html).
 
  # MCLI - mctools Command Line Interface
 
  mctools is shipped with a CLI front end called mcli, which you can use to start rcon sessions, get stats
- via query/ping, check if a Minecraft server is up, ect. 
+ via query/ping, check if a Minecraft server is up, ect.
 
  After installing mctools(through pip or setuptools), you can invoke mcli like so:
  
@@ -139,6 +141,18 @@ if rcon.login("password"):
  Believe me, there is plenty of work that needs to be done. More help would be greatly appreciated!
 
  # Changelog
+
+## 1.2.1
+
+We now correctly disable length checking in RCONClient if specified by the user.
+
+The 'set_timeout()' method in BaseProtocol will now work correctly even if the protocol object is not started.
+This change applies to all clients, as they all use this method.
+
+Added a 'DEFAULT_TIMEOUT' constant and moved some protocol attributes to BaseProtocol to prevent redundancy.
+Protocol objects now init the parent BaseProtocol object.
+
+Fixed some spelling errors, added more type hinting, made some more minor changes to the documentation.
 
 ## 1.2.0
 
@@ -182,7 +196,7 @@ stopping/starting clients a lot better.
  - We now raise an exception if the RCON write data is too big, instead of leaving the connection in a unstable state
     
   ### Features Added:
-  
+
  - Users can now specify the format method on a per-call basis
  - Users can change the timeout value after the object is instantiated
  - The RCON login check feature can be disabled, meaning that you can attempt to send packets

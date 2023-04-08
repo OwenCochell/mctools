@@ -10,6 +10,9 @@ from mctools.packet import RCONPacket, QUERYPacket, PINGPacket
 from mctools.encoding import PINGEncoder
 from mctools.errors import RCONCommunicationError, RCONLengthError, ProtoConnectionClosed
 
+# Default timeout:
+DEFAULT_TIMEOUT = 60
+
 
 class BaseProtocol(object):
     """
@@ -22,6 +25,9 @@ class BaseProtocol(object):
         # Dummy init, primarily meant to specify the socket parameter:
 
         self.sock: socket.socket
+
+        self.timeout = DEFAULT_TIMEOUT  # Defines and sets the timeout value
+        self.connected = False  # Value determining if we are connected
 
     def start(self):
         """
@@ -78,6 +84,8 @@ class BaseProtocol(object):
 
             byts = byts + last
 
+            print(byts)
+
             if last == b'':
 
                 # We received nothing, lets close this connection:
@@ -127,11 +135,23 @@ class BaseProtocol(object):
 
         :param timeout: Value in seconds to set the timeout to
         :type timeout: int
+
+        .. versionadded:: 1.1.0
+
+        This method now works before the protocol object is started
         """
 
-        # Set the timeout:
+        # First, set the timeout value:
 
-        self.sock.settimeout(timeout)
+        self.timeout = timeout
+
+        # Next, determine if we should set the socket timeout:
+
+        if self.connected:
+
+            # Set the timeout:
+
+            self.sock.settimeout(timeout)
 
     def __del__(self):
         """
@@ -161,14 +181,19 @@ class RCONProtocol(BaseProtocol):
 
     def __init__(self, host, port, timeout):
 
+        # Init super class
+        super().__init__()
+
         self.host = host  # Host of the RCON server
         self.port = int(port)  # Port of the RCON server
         self.LOGIN = 3  # Packet type used for logging in
         self.COMMAND = 2  # Packet type for issuing a command
         self.RESPONSE = 0  # Packet type for response
         self.MAX_SIZE = 4096  # Maximum packet size
-        self.connected = False  # Value determining if we are connected
-        self.timeout = timeout  # Global timeout value
+
+        # Finally, set the timeout:
+
+        self.set_timeout(timeout)
 
     def start(self):
         """
@@ -276,32 +301,39 @@ class QUERYProtocol(BaseProtocol):
 
     def __init__(self, host, port, timeout):
 
+        # Init super class
+        super().__init__()
+
         self.host = host  # Host of the Query server
         self.port = int(port)  # Port of the Query server
-        self.started = False  # Determining if we have started communicating with the Query server
-        self.timeout = timeout
+
+        # Finally, set the timeout:
+
+        self.set_timeout(timeout)
 
     def start(self):
         """
         Sets the protocol object as ready to communicate.
         """
 
-        self.started = True
-        
         # Create an ip4 UPD socket:
 
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
         # Set the timeout:
-        
+
         self.sock.settimeout(self.timeout)  # Setting timeout value for socket
+
+        # Set our connected status:
+
+        self.connected = True
 
     def stop(self):
         """
         Sets the protocol object as not ready to communicate.
         """
 
-        self.started = False
+        self.connected = False
 
     def send(self, pack):
         """
@@ -352,10 +384,15 @@ class PINGProtocol(BaseProtocol):
 
     def __init__(self, host, port, timeout):
 
+        # Init super class
+        super().__init__()
+
         self.host = host  # Host of the Minecraft server
         self.port = int(port)  # Port of the Minecraft server
-        self.connected = False  # Value determining if we are connected
-        self.timeout = timeout
+
+        # Finally, set the timeout:
+
+        self.set_timeout(timeout)
 
     def start(self):
         """

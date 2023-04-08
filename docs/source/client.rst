@@ -38,6 +38,7 @@ All clients have the following methods:
     3. stop()
     4. raw_send()
     5. get_formatter()
+    6. set_timeout()
 
 is_connected
 ------------
@@ -124,6 +125,17 @@ This returns the FormatterCollection instance in use by the client,
 which will allow you to fine tune the formatter to your use.
 
 More information can be found in the `Formatter Tutorial. <format.html>`_.
+
+set_timeout
+-----------
+
+This function sets the timeout for network operations:
+
+.. code-block:: python
+
+    client.set_timeout(10)
+
+The above statement will set the timeout value to 10 seconds.
 
 Instantiating Clients
 =====================
