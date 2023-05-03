@@ -84,8 +84,6 @@ class BaseProtocol(object):
 
             byts = byts + last
 
-            print(byts)
-
             if last == b'':
 
                 # We received nothing, lets close this connection:
