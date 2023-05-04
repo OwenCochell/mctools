@@ -142,6 +142,10 @@ if rcon.login("password"):
 
  # Changelog
 
+### 1.2.2
+
+Removed some debugging print statements.
+
 ## 1.2.1
 
 We now correctly disable length checking in RCONClient if specified by the user.
