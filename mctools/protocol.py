@@ -2,13 +2,14 @@
 Low-level protocol stuff for RCON, Query and Server List Ping.
 """
 
-
 import struct
 import socket
 
+from typing import Tuple, Any
+
 from mctools.packet import RCONPacket, QUERYPacket, PINGPacket
 from mctools.encoding import PINGEncoder
-from mctools.errors import RCONCommunicationError, RCONLengthError, ProtoConnectionClosed
+from mctools.errors import RCONLengthError, ProtoConnectionClosed
 
 # Default timeout:
 DEFAULT_TIMEOUT = 60
@@ -21,31 +22,37 @@ class BaseProtocol(object):
     """
 
     def __init__(self) -> None:
-        
-        # Dummy init, primarily meant to specify the socket parameter:
+        self.sock: socket.socket  # Socket to utilize
 
-        self.sock: socket.socket
-
-        self.timeout = DEFAULT_TIMEOUT  # Defines and sets the timeout value
-        self.connected = False  # Value determining if we are connected
+        self.timeout: int = DEFAULT_TIMEOUT  # Defines and sets the timeout value
+        self.connected: bool = False  # Value determining if we are connected
 
     def start(self):
         """
         Method to start the connection to remote entity.
-        This raises a NotImplementedErrorException, as it should be overridden in the child class.
+
+        We simply set the connected value,
+        and configure the timeout.
         """
 
-        raise NotImplementedError("Override this method in child class!")
+        # Set connected to true:
+
+        self.connected = True
+
+        # Set timeout value:
+
+        self.set_timeout(self.timeout)
 
     def stop(self):
         """
         Method to stop the connection to remote entity.
-        This raises a NotImplementedErrorException, as it should be overridden in the child class.
+
+        We simply set the connected value.
         """
 
-        raise NotImplementedError("Override this method in child class!")
+        self.connected = False
 
-    def send(self, data):
+    def send(self, pack: Any):
         """
         Method to send data to remote entity, data type is arbitrary.
         This raises a NotImplementedErrorException, as it should be overridden in the child class.
@@ -55,7 +62,7 @@ class BaseProtocol(object):
 
         raise NotImplementedError("Override this method in child class!")
 
-    def read(self):
+    def read(self) -> Any:
         """
         Method to receive data from remote entity
         This raises a NotImplementedErrorException, as it should be overridden in the child class.
@@ -65,13 +72,14 @@ class BaseProtocol(object):
 
         raise NotImplementedError("Override this method in child class!")
 
-    def read_tcp(self, length):
+    def read_tcp(self, length: int) -> bytes:
         """
         Reads data over the TCP protocol.
 
         :param length: Amount of data to read
         :type length: int
         :return: Read bytes
+        :rtype: bytes
         """
 
         byts = b''
@@ -92,42 +100,46 @@ class BaseProtocol(object):
 
                 # Raise the 'ConnectionClosed' exception:
 
-                raise ProtoConnectionClosed("Connection closed by remote host!")
+                raise ProtoConnectionClosed(
+                    "Connection closed by remote host!")
 
         return byts
 
-    def write_tcp(self, byts):
+    def write_tcp(self, byts: bytes):
         """
         Writes data over the TCP protocol.
 
         :param byts: Bytes to send
-        :return: Data read
+        :type byts: bytes
         """
 
-        return self.sock.sendall(byts)
+        self.sock.sendall(byts)
 
-    def read_udp(self):
+    def read_udp(self) -> Tuple[bytes, str]:
         """
         Reads data over the UDP protocol.
 
-        :return: Bytes read
+        :return: Bytes read and address
+        :rtype: Tuple[bytes, str]
         """
 
         return self.sock.recvfrom(1024)
 
-    def write_udp(self, byts, host, port):
+    def write_udp(self, byts: bytes, host: str, port: int):
         """
         Writes data over the UPD protocol.
 
         :param byts: Bytes to write
+        :type byts: bytes
         :param host: Hostanme of remote host
+        :type host: str
         :param port: Portname of remote host
-        :return:
+        :type port: int
         """
 
         self.sock.sendto(byts, (host, port))
 
-    def set_timeout(self, timeout):
+    def set_timeout(self, timeout: int):
         """
         Sets the timeout value for the underlying socket object.
 
@@ -167,7 +179,7 @@ class BaseProtocol(object):
 
 class RCONProtocol(BaseProtocol):
     """
-    Protocol implementation fot RCON - Uses TCP sockets.
+    Protocol implementation for RCON - Uses TCP sockets.
 
     :param host: Hostname of RCON server
     :type host: str
@@ -175,19 +187,17 @@ class RCONProtocol(BaseProtocol):
     :type port: int
     :param timeout: Timeout value for socket operations.
     :type timeout: int
+
+    .. versionchanged:: 1.3.0
+
+    Moved packet types to RCONPacket
     """
 
-    def __init__(self, host, port, timeout):
-
-        # Init super class
+    def __init__(self, host: str, port: int, timeout: int):
         super().__init__()
 
-        self.host = host  # Host of the RCON server
-        self.port = int(port)  # Port of the RCON server
-        self.LOGIN = 3  # Packet type used for logging in
-        self.COMMAND = 2  # Packet type for issuing a command
-        self.RESPONSE = 0  # Packet type for response
-        self.MAX_SIZE = 4096  # Maximum packet size
+        self.host: str = host  # Host of the RCON server
+        self.port: int = int(port)  # Port of the RCON server
 
         # Finally, set the timeout:
 
@@ -208,24 +218,28 @@ class RCONProtocol(BaseProtocol):
 
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
-        # Set the timeout:
+        # Preform generic start operations:
 
-        self.sock.settimeout(self.timeout)
+        super().start()
+
+        # Create the connection:
 
         self.sock.connect((self.host, self.port))
-
-        self.connected = True
 
     def stop(self):
         """
         Stops the connection to the RCON server.
         """
 
+        # Close the socket:
+
         self.sock.close()
 
-        self.connected = False
+        # Preform generic stop operations:
 
-    def send(self, pack, length_check=False):
+        super().stop()
+
+    def send(self, pack: RCONPacket, length_check: bool = False):
         """
         Sends a packet to the RCON server.
 
@@ -255,12 +269,10 @@ class RCONProtocol(BaseProtocol):
 
         self.write_tcp(data)
 
-    def read(self):
+    def read(self) -> RCONPacket:
         """
         Gets a RCON packet from the RCON server.
 
-        :param timeout: Timeout value specific to this operation.
-        :type timeout: int, None
         :return: RCONPacket containing payload
         :rtype: RCONPacket
         """
@@ -294,16 +306,13 @@ class QUERYProtocol(BaseProtocol):
     :type port: int
     :param timeout: Timeout value for socket operations
     :type timeout: int
-
     """
 
-    def __init__(self, host, port, timeout):
-
-        # Init super class
+    def __init__(self, host: str, port: int, timeout: int):
         super().__init__()
 
-        self.host = host  # Host of the Query server
-        self.port = int(port)  # Port of the Query server
+        self.host: str = host  # Host of the Query server
+        self.port: int = int(port)  # Port of the Query server
 
         # Finally, set the timeout:
 
@@ -318,22 +327,20 @@ class QUERYProtocol(BaseProtocol):
 
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
-        # Set the timeout:
+        # Preform generic start operations:
 
-        self.sock.settimeout(self.timeout)  # Setting timeout value for socket
-
-        # Set our connected status:
-
-        self.connected = True
+        super().start()
 
     def stop(self):
         """
         Sets the protocol object as not ready to communicate.
         """
 
-        self.connected = False
+        # Preform generic stop operations:
 
-    def send(self, pack):
+        super().stop()
+
+    def send(self, pack: QUERYPacket):
         """
         Sends a packet to the Query server.
 
@@ -349,7 +356,7 @@ class QUERYProtocol(BaseProtocol):
 
         self.write_udp(byts, self.host, self.port)
 
-    def read(self):
+    def read(self) -> QUERYPacket:
         """
         Gets a Query packet from the Query server.
 
@@ -380,13 +387,13 @@ class PINGProtocol(BaseProtocol):
     :type timeout: int
     """
 
-    def __init__(self, host, port, timeout):
+    def __init__(self, host: str, port: int, timeout: int):
 
         # Init super class
         super().__init__()
 
-        self.host = host  # Host of the Minecraft server
-        self.port = int(port)  # Port of the Minecraft server
+        self.host: str = host  # Host of the Minecraft server
+        self.port: int = int(port)  # Port of the Minecraft server
 
         # Finally, set the timeout:
 
@@ -401,17 +408,13 @@ class PINGProtocol(BaseProtocol):
 
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
-        # Set the timeout:
+        # Preform generic start tasks:
 
-        self.sock.settimeout(self.timeout)
+        super().start()
 
         # Starting connection
 
         self.sock.connect((self.host, self.port))
-
-        # Setting protocol state
-
-        self.connected = True
 
     def stop(self):
         """
@@ -422,11 +425,11 @@ class PINGProtocol(BaseProtocol):
 
         self.sock.close()
 
-        # Setting protocol state
+        # Preform generic stop tasks:
 
-        self.connected = False
+        super().stop()
 
-    def send(self, pack):
+    def send(self, pack: PINGPacket):
         """
         Sends a ping packet to the Minecraft server.
 
@@ -442,15 +445,13 @@ class PINGProtocol(BaseProtocol):
 
         self.write_tcp(byts)
 
-    def read(self):
+    def read(self) -> PINGPacket:
         """
         Read data from the Minecraft server and convert it into a PINGPacket.
 
         :return: PINGPacket
         :rtype: PINGPacket
         """
-
-        # Reading length data:
 
         # Getting length of ALL data:
 

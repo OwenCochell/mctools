@@ -2,6 +2,10 @@
 Formatters to alter response output - makes everything look pretty
 """
 
+from __future__ import annotations
+
+from typing import Tuple, List, Union, Any, Iterable
+
 # Try to enable colorama support if we have it:
 
 try:
@@ -69,15 +73,13 @@ NAME_MAP = {'black': '0',
 # Added reset value to the front of color codes, as this is normal Java edition operation
 
 
-class BaseFormatter(object):
-
+class BaseFormatter:
     """
     Parent class for formatter implementations.
     """
 
     @staticmethod
-    def format(text):
-
+    def format(text: Any) -> Any:
         """
         Formats text in any way fit.
         Note: This should not remove format chars, that's what remove is for,
@@ -92,8 +94,7 @@ class BaseFormatter(object):
         return text
 
     @staticmethod
-    def clean(text):
-
+    def clean(text: Any) -> Any:
         """
         Removes format chars, instead of replacing them with actual values.
         Great for if the user does not want/have color support,
@@ -108,8 +109,7 @@ class BaseFormatter(object):
         return text
 
     @staticmethod
-    def get_id():
-
+    def get_id() -> int:
         """
         Should return an integer representing the formatter ID.
         This is important, as it determines how the formatters are sorted.
@@ -123,7 +123,6 @@ class BaseFormatter(object):
 
 
 class DefaultFormatter(BaseFormatter):
-
     """
     Formatter with good default operation:
         - format() - Replaces all formatter codes with ascii values
@@ -133,8 +132,7 @@ class DefaultFormatter(BaseFormatter):
     """
 
     @staticmethod
-    def format(text):
-
+    def format(text: str) -> str:
         """
         Replaces all format codes with their intended values
         (Color, text effect, ect).
@@ -187,8 +185,7 @@ class DefaultFormatter(BaseFormatter):
         return text
 
     @staticmethod
-    def clean(text):
-
+    def clean(text: str) -> str:
         """
         Removes all format codes. Does not use color/text effects.
 
@@ -229,8 +226,7 @@ class DefaultFormatter(BaseFormatter):
         return text
 
     @staticmethod
-    def get_id():
-
+    def get_id() -> int:
         """
         Returns this formatters ID, which is 10.
 
@@ -242,15 +238,16 @@ class DefaultFormatter(BaseFormatter):
 
 
 class QUERYFormatter(BaseFormatter):
-
     """
     Formatter for formatting responses from the Query server.
     Will only format certain parts, as servers SHOULD follow a specific implementation for Query.
     """
 
-    @staticmethod
-    def format(text):
+    FORMAT: int = 0  # Value to denote formatting
+    CLEAN: int = 1  # Value to denote cleaning
 
+    @staticmethod
+    def format(text: dict) -> dict:
         """
         Replaces format chars with actual values.
 
@@ -260,11 +257,10 @@ class QUERYFormatter(BaseFormatter):
         :rtype: dict
         """
 
-        return QUERYFormatter._packet_format(text, 0)
+        return QUERYFormatter._packet_format(text, QUERYFormatter.FORMAT)
 
     @staticmethod
-    def clean(text):
-
+    def clean(text: dict) -> dict:
         """
         Removes format chars from the response.
 
@@ -274,11 +270,10 @@ class QUERYFormatter(BaseFormatter):
         :rtype: dict
         """
 
-        return QUERYFormatter._packet_format(text, 1)
+        return QUERYFormatter._packet_format(text, QUERYFormatter.CLEAN)
 
     @staticmethod
-    def _packet_format(data, format_type):
-
+    def _packet_format(data: dict, format_type: int) -> dict:
         """
         Does all the heavy lifting for formatting packets.
         Will determine if a packet is basic or full stats, and format it accordingly.
@@ -297,13 +292,13 @@ class QUERYFormatter(BaseFormatter):
 
         # Formatting the message of the day:
 
-        if format_type == 0:
+        if format_type == QUERYFormatter.FORMAT:
 
             # Format the content:
 
             data['motd'] = DefaultFormatter.format(data['motd'])
 
-        if format_type == 1:
+        if format_type == QUERYFormatter.CLEAN:
 
             # Clean the content:
 
@@ -319,13 +314,13 @@ class QUERYFormatter(BaseFormatter):
 
             for play in data['players']:
 
-                if format_type == 0:
+                if format_type == QUERYFormatter.FORMAT:
 
                     # Format the data:
 
                     final.append(DefaultFormatter.format(play))
 
-                if format_type == 1:
+                if format_type == QUERYFormatter.CLEAN:
 
                     # Clean the data:
 
@@ -339,16 +334,17 @@ class QUERYFormatter(BaseFormatter):
 
 
 class PINGFormatter(BaseFormatter):
-
     """
     Formatter for formatting responses from the server via Server List Ping protocol.
     We only format relevant content, such as description and player names.
     We also use special formatters, such as ChatObjectFormatter, and SampleDescriptionFormatter.
     """
 
-    @staticmethod
-    def format(stat_dict):
+    FORMAT: int = 0  # Value to denote formatting
+    CLEAN: int = 1  # Value to denote cleaning
 
+    @staticmethod
+    def format(stat_dict: dict) -> dict:
         """
         Formats a dictionary of stats from the Minecraft server.
 
@@ -360,11 +356,10 @@ class PINGFormatter(BaseFormatter):
 
         # Formatting description:
 
-        return PINGFormatter._packet_format(stat_dict, 1)
+        return PINGFormatter._packet_format(stat_dict, PINGFormatter.FORMAT)
 
     @staticmethod
-    def clean(stat_dict):
-
+    def clean(stat_dict: dict) -> dict:
         """
         Cleaned a dictionary of stats from the Minecraft server.
 
@@ -376,11 +371,10 @@ class PINGFormatter(BaseFormatter):
 
         # Cleaning description:
 
-        return PINGFormatter._packet_format(stat_dict, 2)
+        return PINGFormatter._packet_format(stat_dict, PINGFormatter.CLEAN)
 
     @staticmethod
-    def _packet_format(stat_dict, form):
-
+    def _packet_format(stat_dict: dict, form: int) -> dict:
         """
         Does all the heavy lifting for format operations.
         Will determine if special formatters are necessary, and use them accordingly.
@@ -401,14 +395,14 @@ class PINGFormatter(BaseFormatter):
 
                 # We need to use ChatObject formatter:
 
-                stat_dict['description'] = (ChatObjectFormatter.format(stat_dict['description']) if form == 1 else
+                stat_dict['description'] = (ChatObjectFormatter.format(stat_dict['description']) if form == PINGFormatter.FORMAT else
                                             ChatObjectFormatter.clean(stat_dict['description']))
 
             else:
 
                 # Primitive formatting, handle it:
 
-                stat_dict['description'] = (DefaultFormatter.format(stat_dict['description']) if form == 1 else
+                stat_dict['description'] = (DefaultFormatter.format(stat_dict['description']) if form == PINGFormatter.FORMAT else
                                             DefaultFormatter.clean(stat_dict['description']))
 
         if 'sample' in stat_dict['players'].keys():
@@ -424,30 +418,31 @@ class PINGFormatter(BaseFormatter):
 
             for name in stat_dict['players']['sample']:
 
-                if form == 1:
+                if form == PINGFormatter.FORMAT:
 
                     # Format the content:
 
-                    final.append([DefaultFormatter.format(name['name']), name['id']])
+                    final.append(
+                        [DefaultFormatter.format(name['name']), name['id']])
 
                 else:
 
-                    # CLean the content:
+                    # Clean the content:
 
-                    final.append([DefaultFormatter.clean(name['name']), name['id']])
+                    final.append(
+                        [DefaultFormatter.clean(name['name']), name['id']])
 
             stat_dict['players']['sample'] = final
 
             # Formatting the message:
 
-            stat_dict['players']['message'] = (DefaultFormatter.format(stat_dict['players']['message']) if form == 1
+            stat_dict['players']['message'] = (DefaultFormatter.format(stat_dict['players']['message']) if form == PINGFormatter.FORMAT
                                                else DefaultFormatter.clean(stat_dict['players']['message']))
 
         return stat_dict
 
 
 class ChatObjectFormatter(BaseFormatter):
-
     """
     A formatter that handles the formatting scheme of ChatObjects.
     This description scheme differs from primitive chat objects, as it doesn't use formatting characters.
@@ -455,8 +450,7 @@ class ChatObjectFormatter(BaseFormatter):
     """
 
     @staticmethod
-    def format(chat, color=None, attrib=None):
-
+    def format(chat: dict, color: str = '', attrib: str = '') -> str:
         """
         Formats a description dictionary, and returns the formatted text.
         This gets tricky, as the server could define a variable number of child dicts that have their own
@@ -475,8 +469,6 @@ class ChatObjectFormatter(BaseFormatter):
 
         # Define some variables for keeping attributes in:
 
-        attrib = attrib if attrib is not None else ''  # Text attributes we should add
-        color = color if color is not None else ''  # Color we should make the text
         extra = ''  # Extra text we should add
         text = ''  # Text we should display
 
@@ -518,7 +510,7 @@ class ChatObjectFormatter(BaseFormatter):
 
                 continue
 
-        # See if their is any extra text to format:
+        # See if there is any extra text to format:
 
         if 'extra' in chat.keys():
 
@@ -528,7 +520,9 @@ class ChatObjectFormatter(BaseFormatter):
 
                 # Send this extra text down with the parent values:
 
-                extra = extra + ChatObjectFormatter.format(child, color=color, attrib=attrib)
+                extra = extra + \
+                    ChatObjectFormatter.format(
+                        child, color=color, attrib=attrib)
 
         # We have to specify color first, or else our style codes will get lost!
         # This is only a problem on certain platforms.
@@ -537,8 +531,7 @@ class ChatObjectFormatter(BaseFormatter):
         return MAP['r'] + color + attrib + DefaultFormatter.format(text) + extra
 
     @staticmethod
-    def clean(text):
-
+    def clean(text: dict) -> str:
         """
         Cleans a description directory, and returns the cleaned text.
 
@@ -566,7 +559,6 @@ class ChatObjectFormatter(BaseFormatter):
 
 
 class SampleDescriptionFormatter(BaseFormatter):
-
     """
     Some servers like to put special messages in the 'sample players' field.
     This formatter attempts to handle this, and sort valid players and null players into separate categories.
@@ -575,15 +567,15 @@ class SampleDescriptionFormatter(BaseFormatter):
     NULL_USER = '00000000-0000-0000-0000-000000000000'  # UUID for null users.
 
     @staticmethod
-    def format(text):
-
+    def format(text: List[dict]) -> Tuple[List[str], str]:
         """
         Formats a sample list of users, removing invalid ones and adding them to a message sublist.
         We return the message in the playerlist, and also return valid players.
 
-        :param text: Valid players, Message encoded in the sample list
-        :type text: list, str
-        :return: Dictionary containing message, and valid users.
+        :param text: List of valid players, Message encoded in the sample list
+        :type text: List[dict]
+        :return: List containing valid users, any embedded messages 
+        :rtype: Tuple[List[str], str]
         """
 
         # Iterate over players:
@@ -616,22 +608,20 @@ class SampleDescriptionFormatter(BaseFormatter):
         return valid, message
 
     @staticmethod
-    def clean(text):
-
+    def clean(text: List[dict]) -> Tuple[List[str], str]:
         """
         Does the same operation as format. This is okay because we don't change up any values or alter the content,
-        we just organise them, and the color formatter will handle it later.
+        we just organize them, and the color formatter will handle it later.
 
         :param text: Valid players, Message encoded in the sample list
-        :type text: list, str
-        :return: Dictionary containing message, and valid users.
+        :type text: List[dict]
+        :return: List containing valid users, and message.
         """
 
         return SampleDescriptionFormatter.format(text)
 
 
 class FormatterCollection:
-
     """
     A collection of formatters - Allows for formatting text with multiple formatters,
     and determining which formatter is relevant to the text.
@@ -645,48 +635,57 @@ class FormatterCollection:
     QUERY = 'QUERY_PROTOCOL'
     PING = 'PING_PROTOCOL'
 
+    Command = Union[str, Iterable[str]]
+    Formatters = List[Tuple[BaseFormatter, Command, Command]]
+
     def __init__(self):
 
-        self._form = []  # List of formatters
+        self._form: FormatterCollection.Formatters = []  # List of formatters
 
-    def _get_id(self, form):
-
+    def _get_id(self, form: BaseFormatter) -> int:
         """
         Gets the formatter ID, used by sort() for sorting formatters.
 
-        :param form: Formatter.
-        :return: Formatter ID.
+        :param form: Formatter to get ID of
+        :type form: BaseFormatter
+        :return: Formatter ID
+        :rtype: int
         """
 
         return form.get_id()
 
-    def add(self, form, command, ignore=None):
-
+    def add(self, form: BaseFormatter, command: FormatterCollection.Command = '', ignore: FormatterCollection.Command = '') -> bool:
         """
         Adds a formatter, MUST inherit the BaseFormatter class.
         Your formatter must either be instantiated upon adding it, or the 'clean' and 'format'
         methods are static, as FormatterCollection will not attempt to instantiate your object.
 
         :param form: Formatter to add.
-        :param command: Command(s) to register the formatter with. May be a string or list. \
-                         Supply an empty string('') to affiliate with every command, \
-                         or a list to affiliate with multiple.
-        :type command: str, list
+        :type form: BaseFormatter
+        :param command: Command(s) to register the formatter with. May be a string or iterable. \
+                         Supply an empty string ('') to affiliate with every command, \
+                         or an iterable to affiliate with multiple.
+        :type command: Union[str, Iterable[str]]
         :param ignore: Commands to ignore, formatter will not format them, leave blank to accept everything.
-                       May be string or list.
-                       Supply 'None' to allow all commands, or a list to affiliate with multiple.
-        :type ignore: str, list
+                       May be a string or iterable.
+                       Supply an empty string ('') to allow all commands, or an iterable to affiliate with multiple.
+        :type ignore: Union[str, Iterable[str]]
         :return: True for success, False for Failure.
         :rtype: bool
+
+        .. versionchanged:: 1.3.0
+
+        We not accept blanks strings instead of None to denote a global match/global allow
         """
 
         # Checking formatter parent class:
 
-        if not issubclass(form, BaseFormatter):
+        if not isinstance(form, BaseFormatter):
 
             # Form is not a subclass
 
-            raise Exception("Invalid Formatter! Must inherit from BaseFormatter!")
+            raise TypeError(
+                "Invalid Formatter! Must inherit from BaseFormatter!")
 
         # Checking command type:
 
@@ -698,7 +697,7 @@ class FormatterCollection:
 
         # Adding formatter to list
 
-        self._form.append([form, command, ignore])
+        self._form.append((form, command, ignore))
 
         # Sorting list of formatters:
 
@@ -706,34 +705,7 @@ class FormatterCollection:
 
         return True
 
-    def _convert_type(self, thing, text):
-
-        """
-        Attempts to convert data into a compatible type(list or string).
-
-        :param thing: Thing to convert.
-        :param text: Weather it is a command, or ignore.
-        :return: Converted type
-        """
-
-        if type(thing) not in [str, tuple, list] and thing is not None:
-
-            # Ignore is not a valid type, checking if it is an int so we can convert it:
-
-            if type(thing) == int:
-
-                # Converting int to string
-
-                return str(thing)
-
-            else:
-
-                raise Exception("Invalid {}} Type! Must be str, list, or tuple!".format(text))
-
-        return thing
-
-    def remove(self, form):
-
+    def remove(self, form: BaseFormatter) -> bool:
         """
         Removes a specified formatter from the list.
 
@@ -743,24 +715,25 @@ class FormatterCollection:
         :rtype: bool
         """
 
-        # Attempting to remove formatter:
+        # Search for formatter in collection:
 
-        try:
+        for num, val in enumerate(self._form):
 
-            self._form.remove(form)
+            # Determine if the formatter is the same:
 
-        except Exception:
+            if form is val[0]:
 
-            # Formatter not found, returning
+                # Found it, remove:
 
-            return False
+                self._form.pop(num)
 
-        # Formatter removed!
+                return True
+
+        # Formatter not found:
 
         return True
 
     def clear(self):
-
         """
         Removes all formatters from the list.
         """
@@ -771,23 +744,21 @@ class FormatterCollection:
 
         return
 
-    def get(self):
-
+    def get(self) -> FormatterCollection.Formatters:
         """
         Returns the list of formatters.
         Can be used to check loaded formatters, or manually edit list.
         Be aware, that manually editing the list means that the formatters may have some unstable operations.
 
-        :return: List of formatters.
-        :rtype: list
+        :return: List of formatters and commands
+        :rtype: List[Tuple[BaseFormatter, Command, Command]]
         """
 
         return self._form
 
-    def format(self, text, command):
-
+    def format(self, text: Any, command: str) -> Any:
         """
-        Runs the text through the format() function of relevant fomatters.
+        Runs the text through the format() function of relevant formatters.
         These formatters will be removing and replacing characters,
         Most likely format chars.
 
@@ -816,8 +787,7 @@ class FormatterCollection:
 
         return text
 
-    def clean(self, text, command):
-
+    def clean(self, text: Any, command: str) -> Any:
         """
         Runs the text through the clean() method of every formatter.
         These formatters will remove characters, without replacing them,
@@ -849,18 +819,73 @@ class FormatterCollection:
 
         return text
 
-    def _is_relevant(self, form, command):
+    def _convert_type(self, thing: Union[str, Iterable[str]], text: str) -> Union[str, Iterable[str]]:
+        """
+        Attempts to convert data into a compatible type(list or string).
 
+        :param thing: Thing to convert.
+        :type thing: Union[str, Iterable[str]]
+        :param text: Weather it is a command, or ignore.
+        :type text: str
+        :return: Converted type
+        :rtype: Union[str, Iterable[str]]
+
+        .. versionchanged:: 1.3.0
+
+        We now accept strings or iterables,
+        and if neither, we attempt to convert to string.
+        """
+
+        # Determine if thing is an iterable:
+
+        try:
+
+            iter(thing)
+
+            # We are an iterable, return:
+
+            return thing
+
+        except:
+
+            # Not iterable, try something else:
+
+            pass
+
+        # Determine if we are not a string
+
+        if type(thing) != str:
+
+            try:
+
+                # Try to convert to string:
+
+                return str(thing)
+
+            except:
+
+                raise Exception(
+                    "Invalid {} Type! Unable to convert to string!".format(text))
+
+        # Otherwise, we are string and are good:
+
+        return thing
+
+    def _is_relevant(self, form: Tuple[BaseFormatter, Command, Command], command: str) -> bool:
         """
         Value determining if the the formatter is relevant to the incoming data.
+
         :param form: List of formatter info.
+        "param form: List[Tuple[BaseFormatter, Command, Command]]
         :param command: Command issued.
+        :type command: str
         :return: True if relevant, False if not.
+        :rtype: bool
         """
 
         # Checking ignore values first:
 
-        if (type(form[2]) == str and form[2] == command) or (type(form[2]) in [list, tuple] and command in form[2]):
+        if (type(form[2]) == str and form[2] == command) or (command in form[2]):
 
             # Command is a value we are ignoring
 
@@ -868,7 +893,7 @@ class FormatterCollection:
 
         # Checking if value is one we are accepting:
 
-        if form[1] == '' or (type(form[1]) == str and form[1] == command) or (type(form[1]) in [list, tuple] and command in form[1]):
+        if (type(form[1]) == str and (form[1] == '' or form[1] == command)) or (command in form[1]):
 
             # Command is a command we can handel:
 
@@ -876,11 +901,12 @@ class FormatterCollection:
 
         return False
 
-    def __len__(self):
-
+    def __len__(self) -> int:
         """
         Returns the amount of formatters in the collection.
+
         :return: Number of formatters in collection.
+        :rtype: int
         """
 
         return len(self._form)

@@ -1,0 +1,41 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+packages = ["mctools"]
+
+[project.scripts]
+mcli="mctools.__main__:main"
+
+[project.urls]
+Documentation = "https://mctools.readthedocs.io/"
+Repository = "https://github.com/Owen-Cochell/mctools"
+Issues = "https://github.com/Owen-Cochell/mctools/issues"
+
+[project]
+name = "mctools"
+version = "1.3.0"
+description = "Python implementations of common Minecraft protocols."
+readme = "README.md"
+license = {"file" = "LICENSE"}
+keywords = ["minecraft", "rcon", "query", "ping", "server list ping"]
+optional-dependencies = {"color" = ["colorama"]}
+authors = [
+  { name = "Owen Cochell", email = "owencochell@hotmail.com" },
+]
+requires-python = ">=3.6, <4"
+classifiers = [
+  "Development Status :: 5 - Production/Stable",
+  "Intended Audience :: Developers",
+  "Topic :: Software Development :: Libraries",
+  "License :: OSI Approved :: MIT License",
+  "Programming Language :: Python :: 3 :: Only",
+  "Programming Language :: Python :: 3.6 :: Only",
+  "Programming Language :: Python :: 3.7",
+  "Programming Language :: Python :: 3.8",
+  "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+]

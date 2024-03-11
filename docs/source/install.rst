@@ -5,15 +5,17 @@ Installation
 Introduction
 ============
 
-This section of the documentation shows how to install mctools. We will cover multiple instillation options here,
+This section of the documentation shows how to install mctools.
+We will cover multiple instillation options here,
 such as installing via pip and getting the source code.
 
 Python
 ======
 
-Before you install mctools, you must first have python and pip installed. We will walk through the process of
-achieving this. We recommend installing python 3.7, but any python 3 version should work. mctools is NOT
-backwards comparable with python 2.
+Before you install mctools, you must first have python and pip installed.
+We will walk through the process of achieving this.
+mctools supports python 3.6 and above,
+but we recommend using the current latest version of python.
 
 More information on installing/configuring python can be found `here <https://www.python.org/downloads/>`_
 
@@ -21,25 +23,28 @@ Linux
 -----
 
 You can install python using your system's package manager.
-Below, we will install python 3.7 and pip using apt, the Debian package manager:
+Below, we will install the default python3 and pip using apt,
+the Debian package manager:
 
 .. code-block:: bash
 
-    $ apt install python3.7 python3-pip
+    $ apt install python3 python3-pip
 
-It is important to specify that we want the python 3 version of pip, or else it will not work correctly.
+It is important to specify that we want the
+python 3 version of pip, or else it will not work correctly.
 
 Windows
 -------
 
-Windows users can download python `here <https://www.python.org/downloads/>`_.
-The instillation is pretty straightforward, although we recommend adding python to your PATH environment
+Windows users can download python from the `python website <https://www.python.org/downloads/>`_.
+The instillation is pretty straightforward,
+although we recommend adding python to your PATH environment
 variable, as it makes using python much easier.
 
 Mac
 ---
 
-You can find instillation instructions `here <https://docs.python-guide.org/starting/install3/osx/>`_.
+You can find installation instructions `here <https://docs.python-guide.org/starting/install3/osx/>`_.
 
 Instillation via PIP
 ====================
@@ -71,7 +76,8 @@ You can acquire the source code from github like so:
 
     $ git clone https://github.com/Owen-Cochell/mctools
 
-This will download the source code to your computer. You can directly reference the package from your application,
+This will download the source code to your computer.
+You can directly reference the package from your application,
 or install it using pip:
 
 .. code-block:: bash

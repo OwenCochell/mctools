@@ -1,12 +1,15 @@
-import argparse
-import sys
-from mctools.mclient import RCONClient, QUERYClient, PINGClient
-from mctools.formattertools import FormatterCollection, DefaultFormatter, QUERYFormatter, PINGFormatter
-import json
-
 """
 A command line interface for interacting/querying Minecraft servers
 """
+
+import argparse
+import sys
+import json
+
+from typing import Union
+
+from mctools.mclient import RCONClient, QUERYClient, PINGClient
+from mctools.formattertools import FormatterCollection, DefaultFormatter, QUERYFormatter, PINGFormatter
 
 RCON_PORT = 25575
 QUERY_PORT = 25565
@@ -16,7 +19,6 @@ SEP = '§9+=====================================================================
 
 
 class _HelpAction(argparse._HelpAction):
-
     """
     Custom HelpAction, so we can display all subparser help output
     """
@@ -48,7 +50,6 @@ class _HelpAction(argparse._HelpAction):
 
 
 class Output:
-
     """
     Class for outputting values to terminal, as well as writing output to files, if necessary
     We use the mclient formattertools to handle the formatting for us,
@@ -57,36 +58,43 @@ class Output:
 
     def __init__(self, args):
 
-        self.quiet = args.quiet  # Boolean determining if we are in quite mode
-        self.color = args.no_color  # Boolean determining if we can use color in output
-        self.show_chars = args.raw  # Boolean determining if we display format chars
-        self.output_path = args.output  # File path to write, None if not writing
-        self.output_chars = args.output_raw  # Boolean determining if we should output format chars into file
-        self.output_replace = args.output_color  # Boolean determining if we should replace chars with ASCII values
-        self.formatters = FormatterCollection()  # FormatterCollection method, used for formatting text
+        self.quiet: bool = args.quiet  # Boolean determining if we are in quite mode
+        # Boolean determining if we can use color in output
+        self.color: bool = args.no_color
+        self.show_chars: bool = args.raw  # Boolean determining if we display format chars
+        # Boolean determining if we should output format chars into file
+        self.output_chars: bool = args.output_raw
+        # Boolean determining if we should replace chars with ASCII values
+        self.output_replace: bool = args.output_color
+        self.output_path: str = args.output  # File path to write, None if not writing
+        # FormatterCollection method, used for formatting text
+        self.formatters = FormatterCollection()
 
-        # Adding base formater:
+        # Adding base formatter:
 
-        self.formatters.add(DefaultFormatter, '', ignore=[self.formatters.QUERY, self.formatters.PING])
+        self.formatters.add(DefaultFormatter(), '', ignore=[
+                            self.formatters.QUERY, self.formatters.PING])
 
         try:
 
-            self.output_favicon = args.show_favicon  # Boolean determining if we should output the favicon
+            # Boolean determining if we should output the favicon
+            self.output_favicon = args.show_favicon
 
         except Exception:
 
             self.output_favicon = False
 
-    def output(self, text, command='', relevant=False):
-
+    def output(self, text: Union[str, dict], command: str = '', relevant: bool = False):
         """
         Outputs text with whatever formatting chars we need,
         Writes text to file if necessary.
 
         :param text: Text to output
+        :type text: Union[str, dict]
         :param command: Command issued when text was generated
+        :type command: str
         :param relevant: Value determining if we are working with relevant text(Response from server)
-        :return:
+        :type relevant: bool
         """
 
         # Formatting text for terminal output:
@@ -95,7 +103,8 @@ class Output:
 
             if relevant and type(text) != str:
 
-                self.recursive_print(self.format_print(text, command, relevant))
+                self.recursive_print(
+                    self.format_print(text, command, relevant))
 
             else:
 
@@ -117,15 +126,18 @@ class Output:
 
             file.close()
 
-    def format_print(self, text, command, relevant):
-
+    def format_print(self, text: str, command: str, relevant: bool) -> str:
         """
         Formats text to be printed to the terminal.
 
         :param text: Text to be formatted.
+        :type text: str
         :param command: Command issued when text was generated.
+        :type command: str
         :param relevant: If text is relevant(Response from server).
+        :type relevant: bool
         :return: Formatted text.
+        :rtype: str
         """
 
         if self.quiet:
@@ -166,14 +178,14 @@ class Output:
 
         return self.formatters.format(text, command)
 
-    def format_file(self, text, command):
-
+    def format_file(self, text: str, command: str) -> str:
         """
         Formats text for outputting into file.
 
         :param text: Text to output
         :param command: Command issued
-        :return:
+        :return: Formatted text
+        :rtype: str
         """
 
         if self.output_chars:
@@ -193,7 +205,6 @@ class Output:
         return self.formatters.clean(text, command)
 
     def recursive_print(self, data, depth=0):
-
         """
         Recursively traverses data presented.
         Formats the data so it is a certain width,
@@ -255,7 +266,8 @@ class Output:
         return
 
 
-parser = argparse.ArgumentParser(description="Minecraft RCON/Query/Ping Server List client", add_help=False)
+parser = argparse.ArgumentParser(
+    description="Minecraft RCON/Query/Ping Server List client", add_help=False)
 
 # Specifying hostname and port number:
 
@@ -265,13 +277,15 @@ subparser = parser.add_subparsers(title="Connection Options", help="Connection O
                                   dest='connection')
 subparser.required = True  # Workaround for previous python 3 versions
 
-parser.add_argument('-h', '--help', help='Show this help message and exit', action=_HelpAction)
+parser.add_argument(
+    '-h', '--help', help='Show this help message and exit', action=_HelpAction)
 
 # Splitting RCON/Query/Server List Ping into separate sup-parsers
 
 # RCON:
 
-rcon_parser = subparser.add_parser('rcon', help='Establish a RCON connection and send commands.')
+rcon_parser = subparser.add_parser(
+    'rcon', help='Establish a RCON connection and send commands.')
 rcon_parser.add_argument('password', help='RCON password')
 rcon_parser.add_argument('-c', '--command', action='append', nargs='+',
                          help='Command to send to the RCON server. May specify multiple.', required=False)
@@ -280,12 +294,15 @@ rcon_parser.add_argument('-i', '--interactive', help="Starts an interactive sess
 
 # QUERY:
 
-query_parser = subparser.add_parser('query', help='Retrieve server statistics via the Query protocol.')
-query_parser.add_argument('-f', '--full', help='Retrieve full stats.', action='store_true')
+query_parser = subparser.add_parser(
+    'query', help='Retrieve server statistics via the Query protocol.')
+query_parser.add_argument(
+    '-f', '--full', help='Retrieve full stats.', action='store_true')
 
 # PING:
 
-ping_parser = subparser.add_parser('ping', help='Retrieve server statistics via the Server List Ping interface.')
+ping_parser = subparser.add_parser(
+    'ping', help='Retrieve server statistics via the Server List Ping interface.')
 ping_parser.add_argument('-sf', '--show-favicon', help='Output favicon data to the terminal.',
                          action='store_true')
 ping_parser.add_argument('-p', '--proto-num', help='Sets the protocol number to use. Use this to emulate different '
@@ -308,14 +325,16 @@ format_options.add_argument('-or', '--output-raw', help='Leaves formatting chars
 
 # Normal Options
 
-parser.add_argument('-nc', '--no-color', help='Disables color output, removes format chars', action='store_false')
+parser.add_argument('-nc', '--no-color',
+                    help='Disables color output, removes format chars', action='store_false')
 parser.add_argument('-r', '--raw',
                     help='Shows format chars, does not remove them', action='store_true')
-parser.add_argument('-t', '--timeout', help='Timeout value for socket operations', default=60, type=int)
-parser.add_argument('-ri', '--reqid', help='Sets a custom request id, instead of randomly generating one.')
-parser.add_argument('-q', '--quiet', help="Program will not output anything to the terminal", action="store_true")
-
-# Checking for no arguments:
+parser.add_argument(
+    '-t', '--timeout', help='Timeout value for socket operations', default=60, type=int)
+parser.add_argument(
+    '-ri', '--reqid', help='Sets a custom request id, instead of randomly generating one.', default=-1)
+parser.add_argument(
+    '-q', '--quiet', help="Program will not output anything to the terminal", action="store_true")
 
 
 def main():
@@ -376,11 +395,13 @@ def main():
 
             out.output(SEP)
 
-            out.output("# Starting TCP connection to §2RCON§r server @ §2{}:{}§r ...".format(host, port))
+            out.output(
+                "# Starting TCP connection to §2RCON§r server @ §2{}:{}§r ...".format(host, port))
 
             rcon.start()
 
-            out.output("# Started TCP connection to §2RCON§r server @ §2{}:{}§r!".format(host, port))
+            out.output(
+                "# Started TCP connection to §2RCON§r server @ §2{}:{}§r!".format(host, port))
 
             # Authenticating to RCON server
 
@@ -392,7 +413,8 @@ def main():
 
                 # Authentication failed!
 
-                out.output("§c# Authentication with §2RCON§c server failed - Incorrect Password!")
+                out.output(
+                    "§c# Authentication with §2RCON§c server failed - Incorrect Password!")
 
                 sys.exit()
 
@@ -408,13 +430,15 @@ def main():
 
                     # Running user command:
 
-                    out.output("# Executing user command: '§2{}§r' ...".format(' '.join(com)))
+                    out.output(
+                        "# Executing user command: '§2{}§r' ...".format(' '.join(com)))
 
                     val = rcon.command(' '.join(com))
 
                     out.output(val, command=com, relevant=True)
 
-                    out.output("# Done executing command: '§2{}§r'!".format(' '.join(com)))
+                    out.output(
+                        "# Done executing command: '§2{}§r'!".format(' '.join(com)))
 
             if args.interactive:
 
@@ -422,7 +446,8 @@ def main():
 
                 out.output(SEP)
                 out.output("§b§nWelcome to the RCON interactive session!")
-                out.output("§bConnection Info:\n  Host: §a{}§b\n  Port: §a{}§b".format(host, port))
+                out.output(
+                    "§bConnection Info:\n  Host: §a{}§b\n  Port: §a{}§b".format(host, port))
                 out.output("§bType 'q' to quit this session.")
                 out.output("§bType 'help' or '?' for info on commands!\n")
 
@@ -460,7 +485,7 @@ def main():
 
             # Adding relevant formatter
 
-            out.formatters.add(QUERYFormatter, FormatterCollection.QUERY)
+            out.formatters.add(QUERYFormatter(), FormatterCollection.QUERY)
 
             if args.full:
 
@@ -502,13 +527,15 @@ def main():
 
             # Adding relevant formatter
 
-            out.formatters.add(PINGFormatter, FormatterCollection.PING)
+            out.formatters.add(PINGFormatter(), FormatterCollection.PING)
 
-            out.output("# Pinging Minecraft server @ §a{}:{}§r and retrieving stats ...".format(host, port))
+            out.output(
+                "# Pinging Minecraft server @ §a{}:{}§r and retrieving stats ...".format(host, port))
 
             val = ping.get_stats()
 
-            out.output("# Retrieved stats! Response time: {} milliseconds".format(val['time']))
+            out.output(
+                "# Retrieved stats! Response time: {} milliseconds".format(val['time']))
 
             out.output("# Statistics:\n")
 

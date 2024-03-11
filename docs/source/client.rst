@@ -8,12 +8,15 @@ Introduction
 ============
 
 This tutorial will give you insight and examples into common client features.
-This is a general guide on client functionality. If you need specific information on a topic,
-like interacting with a server via RCON, see the specific tutorial for that topic.
+This is a general guide on client functionality.
+If you need specific information on a topic,
+like interacting with a server via RCON,
+see the specific tutorial for that topic.
 
 Now, all clients inherit from the BaseClient interface.
 It defines features and usage present in all clients, regardless of operation.
-The default configuration for clients are recommended for most users, as it will do the following:
+The default configuration for clients are
+recommended for most users, as it will do the following:
 
 
     1. Generate a request ID based on system time
@@ -49,9 +52,12 @@ You can use this method to determine if a client is connected:
 
     value = client.is_connected()
 
-This method returns a boolean, where True means we are connected, and False means we are not.
-'Connected' simply means that we have established a TCP stream with the server
-(Or started communicating in the case of UDP), and we are ready to send/receive information.
+This method returns a boolean,
+where True means we are connected, and False means we are not.
+'Connected' simply means that we have
+established a TCP stream with the server
+(Or started communicating in the case of UDP),
+and we are ready to send/receive information.
 
 .. note::
 
@@ -61,28 +67,35 @@ This method returns a boolean, where True means we are connected, and False mean
 start
 -----
 
-You can use this method to start the client, and any underlying protocol objects:
+You can use this method to start the client,
+and any underlying protocol objects:
 
 .. code-block:: python
 
     client.start()
 
-This will, again, start the underlying protocol object, meaning that if we are communicating over TCP,
+This will, again, start the
+underlying protocol object,
+meaning that if we are communicating over TCP,
 a TCP stream will be established.
 
-start() is called automatically where appropriate, so you will not have to start the object yourself.
+start() is called automatically where appropriate,
+so you will not have to start the object yourself.
 
 stop
 ----
 
-You can use this function to stop the client, and close any underlying protocol objects:
+You can use this function to stop the client,
+and close any underlying protocol objects:
 
 .. code-block:: python
 
     client.stop()
 
-It is HIGHLY recommended to call this when you are done communicating with the server.
-Not doing so could cause problems server side. Protocol objects will attempt to gracefully close the
+It is HIGHLY recommended to call this when
+you are done communicating with the server.
+Not doing so could cause problems server side.
+Protocol objects will attempt to gracefully close the
 connection when they are deleted, but this does not always work.
 
 You can stop the client multiple times without any issues,
@@ -104,13 +117,15 @@ raw_send
 
     It is recommended to use the high-level wrappers, as sending your own content could mess up the client instance!
 
-This function gives you the ability to bypass the higher-level client wrappers and send your own information:
+This function gives you the ability to bypass the
+higher-level client wrappers and send your own information:
 
 .. code-block:: python
 
     client.raw_send(*args)
 
-The usage of this command differs from client to client. See the documentation for specific client usage.
+The usage of this command differs from client to client.
+See the documentation for specific client usage.
 
 get_formatters
 --------------
@@ -177,7 +192,8 @@ The request ID is what we use to identify ourselves to a server.
 By default, the client generates a request ID based on system time,
 this occurs when the value for 'reqid' is None.
 
-You may specify your own request ID by passing an integer to the 'reqid' parameter.
+You may specify your own request ID by
+passing an integer to the 'reqid' parameter.
 
 format_method
 -------------
@@ -213,7 +229,8 @@ The default operation is to replace format characters.
 You can also specify the formatting operation on a per-call basis.
 
 For example, let's say you are communicating via RCON,
-and want to remove the formatting characters from the 'help' command, instead of replace them.
+and want to remove the formatting characters from
+the 'help' command, instead of replace them.
 You would call the 'command' function like so:
 
 .. code-block:: python
@@ -224,7 +241,8 @@ Every client method where 'formattable' information is fetched has a
 'format_method' parameter that you can use to set a 'one time' formatting mode.
 If not specified, then the global formatting type will be used.
 
-For more information on formatters, please see the :ref:`Formatter Tutorial. <formatter_tutorial>`
+For more information on formatters,
+please see the :ref:`Formatter Tutorial. <formatter_tutorial>`
 
 timeout
 -------
@@ -241,15 +259,17 @@ Here is an example of this in action:
 
     client.set_timeout(120)
 
-In this example, we have set the socket timeout to 120 seconds. All clients have the 'set_timeout'
-method.
+In this example, we have set the socket timeout to 120 seconds.
+All clients have the 'set_timeout' method.
 
 Packets
 =======
 
-By default, clients only return the most relevant parts of a package, usually a payload.
+By default, clients only return the most
+relevant parts of a package, usually a payload.
 However, some users might want to work with the packages directly.
-All client methods that return server information/statistics can return the raw packets instead of the payloads.
+All client methods that return server information/statistics
+can return the raw packets instead of the payloads.
 This can be done by setting the 'return_pack' argument to 'True'.
 
 Here is an example of this using the PINGClient:
@@ -265,7 +285,7 @@ All clients have context manager support:
 
 .. code-block:: python
 
-    with client as Client('example.host', port=12345):
+    with Client('example.host', port=12345) as client:
 
         client.do_something()
         client.do_another_thing()
@@ -282,8 +302,10 @@ However, individual clients do not raise exceptions when network issues occur,
 which is where 'ProtocolErrors' come in.
 
 A 'ProtocolError' is an exception raised by the underlying protocol object that
-each client uses. This means that it does not matter which client you are using,
-if a network issue occurs, then a 'ProtocolError' will be raised.  
+each client uses. This means that it does
+not matter which client you are using,
+if a network issue occurs,
+then a 'ProtocolError' will be raised.
 
 List of 'ProtocolErrors':
 
@@ -296,7 +318,7 @@ Here is an example of importing and handling these exceptions:
 
     from mctools.errors import ProtoConnectionClosed  # Import the exception we wish to handle
 
-    with client as Client('example.host', port=1234):
+    with Client('example.host', port=1234) as client:
 
         try:
 

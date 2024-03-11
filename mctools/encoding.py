@@ -1,54 +1,18 @@
 """
-Encoding/Decoding Tools for RCON and Query.
+Encoding/Decoding components for RCON and Query.
 """
-
 
 import struct
 import json
 
-from typing import Tuple, Union
+from typing import Tuple, List
 
 from mctools.errors import RCONMalformedPacketError, PINGMalformedPacketError
-
 
 MAP = {''}
 
 
-class BaseEncoder(object):
-
-    """
-    Parent class for encoder implementation.
-    """
-
-    @staticmethod
-    def encode(data):
-
-        """
-        Encodes data, and returns it in byte form.
-        Raises 'NotImplementedError' exception, as this function should be overridden in the child class.
-
-        :param data: Data to be encoded
-        :return: Bytestring
-        """
-
-        raise NotImplementedError("Override this method in child class!")
-
-    @staticmethod
-    def decode(data):
-
-        """
-        Decodes data, and returns it in workable form(Whatever that may be)
-        Raises 'NotImplementedError' exception, as this function should be overridden in the child class.
-
-        :param data: Data to be decoded
-        :return: Data in workable format
-        """
-
-        raise NotImplementedError("Override this method in child class!")
-
-
-class RCONEncoder(BaseEncoder):
-
+class RCONEncoder:
     """
     RCON Encoder/Decoder.
     """
@@ -56,22 +20,27 @@ class RCONEncoder(BaseEncoder):
     PAD = b'\x00\x00'
 
     @staticmethod
-    def encode(data):
-
+    def encode(reqid: int, reqtype: int, payload: str) -> bytes:
         """
         Encodes a RCON packet.
 
-        :param data: Tuple containing packet data
+        :param reqid: Request ID of RCON packet
+        :type reqid: int
+        :param reqtype: Request type of RCON packet
+        :type reqtype: int
+        :param payload: Payload of RCON packet
+        :type payload: str
         :return: Bytestring of encoded data
+        :rtype: bytes
         """
 
         # Encoding the request ID and Request type:
 
-        byts = struct.pack("<ii", data[0], data[1])
+        byts = struct.pack("<ii", reqid, reqtype)
 
         # Encoding payload and padding:
 
-        byts = byts + data[2].encode("utf8") + RCONEncoder.PAD
+        byts += payload.encode("utf8") + RCONEncoder.PAD
 
         # Encoding length:
 
@@ -80,15 +49,16 @@ class RCONEncoder(BaseEncoder):
         return byts
 
     @staticmethod
-    def decode(byts):
-
+    def decode(byts: bytes) -> Tuple[int, int, str]:
         """
         Decodes raw bytestring packet from the RCON server.
-        NOTE: DOES NOT DECODE LENGTH! The 'length' vale is omitted, as it is interpreted by the RCONProtocol.
+        NOTE: DOES NOT DECODE LENGTH! The 'length' value is omitted, as it is interpreted by the RCONProtocol.
         If your bytestring contains the encoded length, simply remove the first 4 bytes.
 
-        :param byts: Bytestring
-        :return: Tuple containing values
+        :param byts: Bytestring to decode
+        :type byts: bytes
+        :return: Tuple containing values, request ID, request type, payload
+        :rtype: Tuple[int, int, str]
         """
 
         # Getting request ID and request type
@@ -112,33 +82,84 @@ class RCONEncoder(BaseEncoder):
         return reqid, reqtype, payload.decode("utf8")
 
 
-class QUERYEncoder(BaseEncoder):
-
+class QUERYEncoder:
     """
     Query encoder/decoder
     """
 
-    IDENT = b'\xfe\xfd'  # Magic bytes to add to the front of the packet
-    KEYS = ['motd', 'gametype', 'map', 'numplayers', 'maxplayers', 'hostport', 'hostip']  # For parsing short-stats
+    IDENT: bytes = b'\xfe\xfd'  # Magic bytes to add to the front of the packet
+    KEYS: List[str] = ['motd', 'gametype', 'map', 'numplayers', 'maxplayers',
+            'hostport', 'hostip']  # For parsing short-stats
+
+    BASIC_REQUEST: int = 0  # Basic data request
+    BASIC_RESPONSE: int = 1  # Basic data response
+    FULL_REQUEST: int = 2  # Full data request
+    FULL_RESPONSE: int = 3  # Full data response
+    HANDSHAKE_REQUEST: int = 5  # Challenge request packet
+    HANDSHAKE_RESPONSE: int = 6  # Challenge response packet
+
+    STAT_TYPE: int = 0  # QUERY type for getting stats
+    HANDSHAKE_TYPE: int = 9  # QUERY type for preforming handshake
 
     @staticmethod
-    def encode(data):
-
+    def encode(packet_type: int, reqtype: int, reqid: int, chall: int) -> bytes:
         """
         Encodes a Query Packet.
 
-        :param data: Tuple of data to encode
+        :param packet_type: Type of query packet
+        :type packet_type: int
+        :param reqtype: Type of request, will be auto-determined if (-1)
+        :type reqtype: int
+        :param reqid: Request ID of query packet
+        :type reqid: int
+        :param chall: Challenge token from query server
+        :type chall: int
         :return: Encoded data
+        :rtype: bytes
+
+        .. versionchanged: 1.3.0
+
+        We no longer consider the 'data_type', we only do checking using the packet type.
+
+        If reqtype is not provided (-1), we determine the value using the packet_type parameter.
+
+        Input parameters have been changed
         """
+
+        # Determine if we need to figure out request type:
+
+        if reqtype == -1:
+
+            # Are we a handshake request:
+
+            if packet_type == QUERYEncoder.HANDSHAKE_REQUEST:
+
+                # Set request type to handshake:
+
+                reqtype = QUERYEncoder.HANDSHAKE_TYPE
+
+            # Are we a stat request:
+
+            elif packet_type == QUERYEncoder.FULL_REQUEST or packet_type == QUERYEncoder.BASIC_REQUEST:
+
+                # Set request type to stat:
+
+                reqtype = QUERYEncoder.STAT_TYPE
+
+            else:
+
+                # Neither, raise an error:
+
+                raise ValueError("Bad packet type provided!")
 
         # Converting type to bytes
 
-        byts = data[0].to_bytes(1, "big")
+        byts = reqtype.to_bytes(1, "big")
 
         # Converting request ID
         # Bitwise operation is necessary, as Minecraft Query only interprets the lower 4 bytes
 
-        byts = byts + struct.pack(">i", data[1] & 0x0F0F0F0F)
+        byts += struct.pack(">i", reqid & 0x0F0F0F0F)
 
         # Adding magic bits:
 
@@ -146,30 +167,35 @@ class QUERYEncoder(BaseEncoder):
 
         # Encoding payload - This gets messy, as the payload can be many things
 
-        if data[3] == "basic" or data[3] == "full":
+        if packet_type == QUERYEncoder.BASIC_REQUEST or packet_type == QUERYEncoder.FULL_REQUEST:
 
             # Must supply a challenge token to authenticate
 
-            byts = byts + struct.pack(">i", data[2])
+            byts += struct.pack(">i", chall)
 
-        if data[3] == "full":
+        if packet_type == QUERYEncoder.FULL_REQUEST:
 
             # Must add padding, requesting full stats
 
-            byts = byts + b'\x00\x00\x00\x00'
+            byts += b'\x00\x00\x00\x00'
 
         return byts
 
     @staticmethod
-    def decode(byts):
-
+    def decode(byts: bytes) -> Tuple[int, int, int, dict, int]:
         """
         Decodes packets from the Query protocol.
         This gets really messy, as the payload can be many different things.
         We also figure out what kind of data we are working with, and return that.
 
         :param byts: Bytes to decode
-        :return: Tuple containing decoded items - reqtype, reqid, chall, data, type
+        :type byts: bytes
+        :return: Tuple containing decoded items - packet_type, reqid, chall, data, reqtype
+        :rtype: Tuple[int, int, int, dict, str]
+
+        .. versionchanged:: 1.3.0
+
+        Changed the return values
         """
 
         # Getting type here:
@@ -192,7 +218,7 @@ class QUERYEncoder(BaseEncoder):
 
             # Returning info:
 
-            return reqtype, reqid, int(split[0].decode('utf8')), None, "chall"
+            return QUERYEncoder.HANDSHAKE_RESPONSE, reqid, int(split[0].decode('utf8')), {}, reqtype
 
         # Working with stats data - This gets messy
 
@@ -212,18 +238,20 @@ class QUERYEncoder(BaseEncoder):
 
                     # Adding short to the dictionary
 
-                    short_dict[QUERYEncoder.KEYS[num]] = str(struct.unpack("<H", val[:2])[0])
+                    short_dict[QUERYEncoder.KEYS[num]] = str(
+                        struct.unpack("<H", val[:2])[0])
 
                     # Overriding values, so hostip can be properly added
 
                     val = val[2:]
                     num = num + 1
 
-                short_dict[QUERYEncoder.KEYS[num]] = val.replace(b'\x1b', b'\u001b').decode("ISO-8859-1")
+                short_dict[QUERYEncoder.KEYS[num]] = val.replace(
+                    b'\x1b', b'\u001b').decode("ISO-8859-1")
 
             # Return info:
 
-            return reqtype, reqid, None, short_dict, "basic"
+            return QUERYEncoder.BASIC_RESPONSE, reqid, -1, short_dict, reqtype
 
         # Working with full stats - This gets even more messy
 
@@ -263,11 +291,10 @@ class QUERYEncoder(BaseEncoder):
 
         # Returning info
 
-        return reqtype, reqid, None, data_dict, "full"
+        return QUERYEncoder.FULL_RESPONSE, reqid, -1, data_dict, reqtype
 
 
-class PINGEncoder(BaseEncoder):
-
+class PINGEncoder:
     """
     Ping encoder/decoder.
     """
@@ -275,68 +302,96 @@ class PINGEncoder(BaseEncoder):
     ID = b'\x00'
     PINGID = b'\x01'
 
-    @staticmethod
-    def encode(data):
+    HANDSHAKE: int = 0  # Handshake packet, used for initiating connection
+    STATUS_REQUEST: int = 1  # Client asks for server status
+    STATUS_RESPONSE: int = 2  # Response packet containing server status
+    PING_REQUEST: int = 3  # Client asks for PING operation to measure latency
+    PONG_RESPONSE: int = 4  # PONG response packet
 
+    @staticmethod
+    def encode(data: dict, pingnum: int, packet_type: int, proto: int, hostname: str, port: int) -> bytes:
         """
         Encodes a Ping packet.
 
-        :param data: Data to be encoded, in tuple form
-        :return: Bytes
+        :param data: Ping data from server
+        :type data: dict
+        :param pingnum: Number for ping operations
+        :type pingnum: int
+        :param packet_type: Type of packet we are working with
+        :type packet_type: int
+        :param proto: Protocol version number
+        :type proto: int
+        :param hostname: Hostname of the minecraft server
+        :type hostname
+        :param port: Port we are connecting to
+        :type port: int
+        :return: Encoded data
+        :rtype: bytes
+
+        .. versionchanged:: 1.3.0
+
+        We now raise an exception if invalid packet type is provided
         """
 
-        if data[2] == 'ping':
+        if packet_type == PINGEncoder.PING_REQUEST:
 
-            # Encoding ping packet here
+            # Encoding ping request packet here
 
-            byts = PINGEncoder.PINGID + struct.pack(">Q", data[1])
+            byts = PINGEncoder.PINGID + struct.pack(">Q", pingnum)
 
             return PINGEncoder.encode_varint(len(byts)) + byts
 
-        if data[2] == 'req':
+        if packet_type == PINGEncoder.STATUS_REQUEST:
 
-            # Working with request packet:
+            # Working with status request packet:
 
             return PINGEncoder.encode_varint(len(PINGEncoder.ID)) + PINGEncoder.ID
 
-        # Working with handshake packet - Starting with the packet ID, always null byte:
+        if packet_type == PINGEncoder.HANDSHAKE:
 
-        byts = PINGEncoder.ID
+            # Working with handshake packet - Starting with the packet ID, always null byte:
 
-        # Encoding Protocol version:
+            byts = PINGEncoder.ID
 
-        byts = byts + PINGEncoder.encode_varint(data[3])
+            # Encoding Protocol version:
 
-        # Encoding server address:
+            byts += PINGEncoder.encode_varint(proto)
 
-        host_bytes = data[4].encode("utf8")
+            # Encoding server address:
 
-        byts = byts + PINGEncoder.encode_varint(len(host_bytes)) + host_bytes
+            host_bytes = hostname.encode("utf8")
 
-        # Encoding server port:
+            byts += PINGEncoder.encode_varint(len(host_bytes)) + host_bytes
 
-        byts = byts + struct.pack(">H", data[5])
+            # Encoding server port:
 
-        # Encoding next state:
+            byts += struct.pack(">H", port)
 
-        byts = byts + PINGEncoder.encode_varint(1)
+            # Encoding next state:
 
-        # Encoding length:
+            byts += PINGEncoder.encode_varint(1)
 
-        byts = PINGEncoder.encode_varint(len(byts)) + byts
+            # Encoding length:
 
-        return byts
+            byts = PINGEncoder.encode_varint(len(byts)) + byts
+
+            return byts
+
+        # Otherwise, raise an error as the packet type is bad:
+
+        raise ValueError("Bad PINGPacket type! MUST be set using PINGPacket constants!")
 
     @staticmethod
-    def decode(byts) -> Tuple[dict, None, str]:
-
+    def decode(byts: bytes) -> Tuple[dict, int]:
         """
         Decodes a ping packet.
         NOTE: Bytes provided should NOT include the length,
         that is interpreted and used by the PINGProtocol.
 
         :param byts: Bytes to decode
-        :return: Tuple of decoded values
+        :type byts: bytes
+        :return: Tuple of decoded values, data and packet type
+        :rtype: Tuple[dict, str]
         """
 
         # Get the packet type:
@@ -351,25 +406,26 @@ class PINGEncoder(BaseEncoder):
 
             length, length_read = PINGEncoder.decode_varint(byts[type_read:])
 
-            return json.loads(byts[length_read+type_read:].decode("utf-8", 'ignore'), strict=False), None, "resp"
+            return json.loads(byts[length_read+type_read:].decode("utf-8", 'ignore'), strict=False), PINGEncoder.STATUS_RESPONSE
 
         elif pack_type == 1:
 
             # Working with some other packet type:
 
-            return {}, None, "pong"
+            return {}, PINGEncoder.PONG_RESPONSE
 
-        raise PINGMalformedPacketError("Invalid packet type! Must be 1 or 0, not {}!".format(pack_type))
+        raise PINGMalformedPacketError(
+            "Invalid packet type! Must be 1 or 0, not {}!".format(pack_type))
 
     @staticmethod
     def encode_varint(num: int) -> bytes:
-
         """
         Encodes a number into varint bytes.
 
         :param num: Number to encode
         :type num: int
-        :return: Bytes
+        :return: Encoded bytes
+        :rtype: bytes
         """
 
         byts: bytes = b''
@@ -392,13 +448,13 @@ class PINGEncoder(BaseEncoder):
         return byts
 
     @staticmethod
-    def decode_varint(byts) -> Tuple[int, int]:
-
+    def decode_varint(byts: bytes) -> Tuple[int, int]:
         """
         Decodes varint bytes into an integer.
         We also return the amount of bytes read.
 
         :param byts: Bytes to decode
+        :type byts: bytes
         :return: result, bytes read
         :rtype: int, int
         """
@@ -423,13 +479,13 @@ class PINGEncoder(BaseEncoder):
 
     @staticmethod
     def decode_sock(sock) -> int:
-
         """
         Decodes a var(int/long) of variable length or value.
         We use a socket to continuously pull values until we reach a valid value,
         as the length of these var(int/long)s can be either very long or very short.
 
         :param sock: Socket object to get bytes from.
+        :type sock: socket.socket
         :return: Decoded integer
         :rtype: int
         """

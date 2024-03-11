@@ -1,4 +1,3 @@
-
 """
 Exception objects for mctools.
 """
@@ -21,6 +20,7 @@ class ProtocolError(MCToolsError):
     as they all use the same backend.
     """
 
+    pass
 
 class ProtoConnectionClosed(ProtocolError):
     """
