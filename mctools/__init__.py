@@ -6,5 +6,5 @@ from mctools.mclient import RCONClient, QUERYClient, PINGClient
 
 # Define some metadata here:
 
-__version__ = importlib.metadata.version("mctools")
+__version__ = '1.3.0'
 __author__ = 'Owen Cochell'
