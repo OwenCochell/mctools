@@ -4,6 +4,7 @@ Encoding/Decoding components for RCON and Query.
 
 import struct
 import json
+import asyncio
 
 from typing import Tuple, List
 
@@ -528,5 +529,59 @@ class PINGEncoder:
                 # Varint/long is way too big, throw an error
 
                 raise Exception("Varint/long is greater than 10!")
+
+        return result
+
+    @staticmethod
+    async def adecode_sock(reader: asyncio.StreamReader, timeout: int | None) -> int:
+        """
+        Decodes a var(int/long) of variable length or value.
+        We use a socket to continuously pull values until we reach a valid value,
+        as the length of these var(int/long)s can be either very long or very short.
+
+        :param sock: Socket object to get bytes from.
+        :type sock: socket.socket
+        :return: Decoded integer
+        :rtype: int
+        """
+
+        result = 0  # Outcome of the operation
+        read = 0  # Number of times we read
+
+        while True:
+
+            # Getting a byte:
+
+            part = await asyncio.wait_for(reader.read(1), timeout)
+
+            if len(part) == 0:
+
+                # Can't work with this, must be done.
+
+                break
+
+            # Change into something we can understand:
+
+            byte = ord(part)
+
+            # Do our bitwise operation:
+
+            result |= (byte & 0x7F) << 7 * read
+
+            # Increment the amount of times we read:
+
+            read = read + 1
+
+            if not byte & 0x80:
+
+                # Found the end:
+
+                break
+
+            if read > 10:
+
+                # Varint/long is way too big, throw an error
+
+                raise ProtocolError("Varint/long is greater than 10!")
 
         return result
