@@ -205,10 +205,10 @@ class AsyncUDPProtocol(AsyncBaseProtocol, asyncio.Protocol):
             self.queue = asyncio.Queue()
             self.shutdown = asyncio.Event()
 
-        def connection_made(self, transport):
+        def connection_made(self, transport: asyncio.DatagramTransport):
             self.transport = transport
 
-        def datagram_received(self, data, addr):
+        def datagram_received(self, data: bytes, addr: Tuple[bytes, Tuple[str, int]]):
             # Put received data into the queue
             self.queue.put_nowait((data, addr))
 
