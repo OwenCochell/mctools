@@ -32,6 +32,12 @@ and have the same interfaces.
 The only difference is some methods are marked async
 (allowing them to be used in asyncio event loops),
 and async components are used under the hood.
+These async clients can be imported like so:
+
+.. code-block:: python
+
+    import mctools.async_mclient
+
 You should checkout the :ref:`API Reference <api_reference>` for more info.
 
 .. note::
