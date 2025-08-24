@@ -287,7 +287,7 @@ parser.add_argument(
 rcon_parser = subparser.add_parser(
     'rcon', help='Establish a RCON connection and send commands.')
 rcon_parser.add_argument('password', help='RCON password')
-rcon_parser.add_argument('-c', '--command', action='append', nargs='+',
+rcon_parser.add_argument('-c', '--command', action='append',
                          help='Command to send to the RCON server. May specify multiple.', required=False)
 rcon_parser.add_argument('-i', '--interactive', help="Starts an interactive session with the RCON server.",
                          action="store_true")
@@ -431,14 +431,14 @@ def main():
                     # Running user command:
 
                     out.output(
-                        "# Executing user command: '§2{}§r' ...".format(' '.join(com)))
+                        "# Executing user command: '§2{}§r' ...".format(com))
 
-                    val = rcon.command(' '.join(com))
+                    val = rcon.command(com)
 
                     out.output(val, command=com, relevant=True)
 
                     out.output(
-                        "# Done executing command: '§2{}§r'!".format(' '.join(com)))
+                        "# Done executing command: '§2{}§r'!".format(com))
 
             if args.interactive:
 
