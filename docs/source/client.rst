@@ -26,6 +26,14 @@ recommended for most users, as it will do the following:
 
 However, advanced users may find tweaking these features to be helpful.
 
+In addition, as of version 1.4.0, async clients are available for use.
+These clients behave the same as their synchronous counterparts,
+and have the same interfaces.
+The only difference is some methods are marked async
+(allowing them to be used in asyncio event loops),
+and async components are used under the hood.
+You should checkout the :ref:`API Reference <api_reference>` for more info.
+
 .. note::
 
     In all following examples, we assume that a client is properly imported,
