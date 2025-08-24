@@ -196,11 +196,11 @@ class AwaitableDatagramProtocol(asyncio.Protocol):
         # The socket has been closed
         self.shutdown.set()
 
-    async def read_datagram(self):
+    async def read_datagram(self, timeout: int | None=None):
         read_queue_task = asyncio.create_task(self.queue.get())
         shutdown_monitor_task = asyncio.create_task(self.shutdown.wait())
 
-        done, pending = await asyncio.wait([read_queue_task, shutdown_monitor_task], return_when=asyncio.FIRST_COMPLETED)
+        done, pending = await asyncio.wait_for(asyncio.wait([read_queue_task, shutdown_monitor_task], return_when=asyncio.FIRST_COMPLETED), timeout=timeout)
 
         for task in pending:
             task.cancel()
@@ -244,7 +244,7 @@ class AsyncUDPProtocol(AsyncBaseProtocol, asyncio.Protocol):
         :rtype: Tuple[bytes, str]
         """
 
-        return await self.protocol.read_datagram()
+        return await self.protocol.read_datagram(self.timeout)
 
     def write_udp(self, byts: bytes):
         """
