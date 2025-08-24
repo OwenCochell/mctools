@@ -533,7 +533,7 @@ class PINGEncoder:
         return result
 
     @staticmethod
-    async def adecode_sock(reader: asyncio.StreamReader, timeout: int | None) -> int:
+    async def adecode_sock(reader: asyncio.StreamReader, timeout: int) -> int:
         """
         Decodes a var(int/long) of variable length or value.
         We use a socket to continuously pull values until we reach a valid value,
