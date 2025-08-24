@@ -1,3 +1,5 @@
+.. _api_reference:
+
 =============
 API Reference
 =============
@@ -18,6 +20,12 @@ MClient Reference
 .. automodule:: mctools.mclient
    :members:
 
+Async MClient Reference
+=======================
+
+.. automodule:: mctools.async_mclient
+   :members:
+
 Packet Reference
 ================
 
@@ -34,6 +42,12 @@ Protocol Reference
 ==================
 
 .. automodule:: mctools.protocol
+   :members:
+
+Async Protocol Reference
+========================
+
+.. automodule:: mctools.async_protocol
    :members:
 
 Formatting Tools Reference
