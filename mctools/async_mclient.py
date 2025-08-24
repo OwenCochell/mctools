@@ -1,7 +1,7 @@
 """
-Main Minecraft Connection Clients - Easy to use API for the underlying modules
+Main Minecraft Connection Async Clients - Easy to use API for the underlying modules
 Combines the following:
-- Protocol Implementations
+- Async Protocol Implementations
 - Packet implementations
 - Formatting tools
 """

@@ -1,5 +1,5 @@
 """
-Low-level protocol stuff for RCON, Query and Server List Ping.
+Low-level async protocol stuff for RCON, Query and Server List Ping.
 """
 
 import struct
