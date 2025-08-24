@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.4.0
+
+This release adds async clients that can be utilized in asyncio event loops.
+
+### Added
+
+- Added async clients for RCON, QUERY, and PING operations
+- Added async protocol objects, which should lead to improved performance in asyncio loops
+- Documentation changes regarding the async clients
+
 ## 1.3.0
 
 This release contains some minor redesigns and bugfixes.

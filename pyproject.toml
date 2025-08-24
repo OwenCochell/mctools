@@ -15,7 +15,7 @@ Issues = "https://github.com/Owen-Cochell/mctools/issues"
 
 [project]
 name = "mctools"
-version = "1.3.0"
+version = "1.4.0"
 description = "Python implementations of common Minecraft protocols."
 readme = "README.md"
 license = {"file" = "LICENSE"}

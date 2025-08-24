@@ -18,6 +18,7 @@ This allows you to do the following:
 - And much more!
 
 All of this can be achieved using simple, intuitive calls to mctools. mctools does all the heavy lifting for you!
+We offer synchronous and asynchronous components, allowing mctools to be used in asyncio event loops. 
 Also, mctools has no external dependencies(Unless you are a windows user and need color support),
 and only uses the python standard library. Just download and go!
 
