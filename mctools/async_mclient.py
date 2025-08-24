@@ -21,7 +21,7 @@ from mctools.errors import RCONAuthenticationError, RCONMalformedPacketError
 
 class AsyncBaseClient:
     """
-    Parent class for Minecraft Client implementations.
+    Parent class for Async Minecraft Client implementations.
     This class has the following formatting constants, which every client inherits:
 
       - AsyncBaseClient.RAW - Tells the client to not format any content.
@@ -30,10 +30,6 @@ class AsyncBaseClient:
       - AsyncBaseClient.DEFAULT - Chooses the global default
 
     You can use these constants in the 'format_method' parameter in each client.
-
-    .. versionchanged:: 1.3.0
-
-    Removed interface method 'raw_send()', as no generic definition exists.
     """
 
     # Formatting codes
@@ -60,7 +56,7 @@ class AsyncBaseClient:
 
     def set_timeout(self, timeout: int):
         """
-        Sets the timeout for the underlying socket object.
+        Sets the timeout for the underlying protocol.
 
         :param timeout: Value in seconds to set the timeout to
         :type timeout: int
@@ -123,7 +119,7 @@ class AsyncBaseClient:
 
     async def __aenter__(self) -> Any:
         """
-        All clients MUST have context manager support!
+        All clients MUST have async context manager support!
 
         We simply return ourselves once in a context manager.
         """
@@ -132,7 +128,7 @@ class AsyncBaseClient:
 
     async def __aexit__(self, exc_type, exc_val, exc_tb):
         """
-        All clients MUST have context manager support!
+        All clients MUST have async context manager support!
         (Recommend showing exceptions, AKA returning False)
 
         :param exc_type: Exception info
@@ -150,7 +146,7 @@ class AsyncBaseClient:
 
 class AsyncRCONClient(AsyncBaseClient):
     """
-    RCON client, allows for user to interact with the Minecraft server via the RCON protocol.
+    Async RCON client, allows for user to interact with the Minecraft server via the RCON protocol.
 
     :param host: Hostname of the Minecraft server
         (Can be an IP address or domain name, anything your computer can resolve)
@@ -189,7 +185,6 @@ class AsyncRCONClient(AsyncBaseClient):
         """
 
         # Start the protocol instance:
-        print("Starting")
 
         if not self.is_connected():
 
@@ -266,14 +261,6 @@ class AsyncRCONClient(AsyncBaseClient):
         :raises:
             RCONAuthenticationError: If the server refuses to server us and we are not authenticated.
             RCONMalformedPacketError: If the request ID's do not match of the packet is otherwise malformed.
-
-        .. versionadded:: 1.1.0
-
-        The 'frag_check' parameter
-
-        .. versionadded:: 1.1.2
-
-        The 'length_check' parameter
         """
         async with self._lock:
             if not self.is_connected():
@@ -433,14 +420,6 @@ class AsyncRCONClient(AsyncBaseClient):
             regardless of weather auth checking is enabled.
             RCONMalformedPacketError: If the packet we received is broken or is not the correct packet.
             RCONLengthError: If the outgoing packet is larger than 1460 bytes
-
-        .. versionadded:: 1.1.0
-
-        The 'check_auth', 'format_method', 'return_packet', and 'frag_check' parameters
-
-        .. versionadded:: 1.1.2
-
-        The 'length_check' parameter
         """
 
         # Checking authentication status:
@@ -510,7 +489,7 @@ class AsyncRCONClient(AsyncBaseClient):
 
     async def __aenter__(self) -> AsyncRCONClient:
         """
-        In a context manager.
+        In an async context manager.
 
         :return: This instance
         """
@@ -520,7 +499,7 @@ class AsyncRCONClient(AsyncBaseClient):
 
 class AsyncQUERYClient(AsyncBaseClient):
     """
-    Query client, allows for user to interact with the Minecraft server via the Query protocol.
+    Async query client, allows for user to interact with the Minecraft server via the Query protocol.
 
     :param host: Hostname of the Minecraft server
     :type host: str
@@ -561,7 +540,7 @@ class AsyncQUERYClient(AsyncBaseClient):
         """
         Stops the connection to the Query server.
         In this case, it is not strictly necessary to stop the connection,
-        as QueryClient uses the UDP protocol. It is still recommended to stop the instance any way,
+        as AsyncQueryClient uses the UDP protocol. It is still recommended to stop the instance any way,
         so you can be explicit in your code as to when you are going to stop communicating over the network.
         """
 
@@ -593,13 +572,6 @@ class AsyncQUERYClient(AsyncBaseClient):
         :type reqtype: int
         :return: QUERYPacket containing response
         :rtype: QUERYPacket
-
-        .. versionchanged:: 1.3.0
-
-        We now identity request type primarily using the 'packet_type' parameter.
-        You may provide the request type, but otherwise mctools will auto-determine it for you.
-
-        Parameter types and order has been changed.
         """
 
         # Check if we are connected:
@@ -649,10 +621,6 @@ class AsyncQUERYClient(AsyncBaseClient):
         :type return_packet: bool
         :return: Dictionary of basic stats, or QUERYPacket, depending on 'return_packet'.
         :rtype: dict, QUERYPacket
-
-        .. versionadded:: 1.1.0
-
-        The 'format_method' and 'return_packet' parameters
         """
 
         # Getting challenge response:
@@ -688,10 +656,6 @@ class AsyncQUERYClient(AsyncBaseClient):
         :type return_packet: bool
         :return: Dictionary of full stats, or QUERYPacket, depending on 'return_packet'.
         :rtype: dict
-
-        .. versionadded:: 1.1.0
-
-        The 'format_method' and 'return_packet' parameters
         """
 
         # Getting challenge response:
@@ -767,7 +731,7 @@ class AsyncQUERYClient(AsyncBaseClient):
 
 class AsyncPINGClient(AsyncBaseClient):
     """
-    Ping client, allows for user to interact with the Minecraft server via the Server List Ping protocol.
+    Async ping client, allows for user to interact with the Minecraft server via the Server List Ping protocol.
 
     :param host: Hostname of the Minecraft server
     :type host: str
@@ -880,14 +844,6 @@ class AsyncPINGClient(AsyncBaseClient):
         """
         Pings the Minecraft server and calculates the latency.
 
-        .. versionadded:: 1.3.0
-
-        We no longer request ping stats, we only preform the ping operation.
-
-        .. versionadded:: 1.2.0
-
-        We now automatically stop this client after the operation
-
         :return: Time elapsed(in milliseconds).
         :rtype: float
         """
@@ -917,14 +873,6 @@ class AsyncPINGClient(AsyncBaseClient):
         :type return_packet: bool
         :return: Dictionary containing stats, or PINGPacket depending on 'return_packet'
         :rtype: dict, PINGPacket
-
-        .. versionadded:: 1.1.0
-
-        The 'format_method' and 'return_packet' parameters
-
-        .. versionadded:: 1.2.0
-
-        We now automatically stop this client after the operation
         """
 
         # Sending handshake packet:

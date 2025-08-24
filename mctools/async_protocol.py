@@ -17,7 +17,7 @@ DEFAULT_TIMEOUT = 60
 
 class AsyncBaseProtocol(object):
     """
-    Parent Class for protocol implementations.
+    Parent Class for async protocol implementations.
     Every protocol instance should inherit this class!
     """
 
@@ -68,24 +68,27 @@ class AsyncBaseProtocol(object):
 
     def set_timeout(self, timeout: int):
         """
-        Sets the timeout value for the underlying socket object.
+        Sets the timeout value.
 
         :param timeout: Value in seconds to set the timeout to
         :type timeout: int
-
-        .. versionadded:: 1.1.0
-
-        This method now works before the protocol object is started
         """
-        if timeout == 0:
-            self.timeout = None
-        else:
-            self.timeout = timeout
+        self.timeout = timeout
 
 
 class AsyncTCPProtocol(AsyncBaseProtocol):
+    """
+    Parent Class for async TCP protocol implementations.
 
-    def __init__(self, host, port):
+    :param host: Hostname of TCP server
+    :type host: str
+    :param port: Port number of the TCP server
+    :type port: int
+    :param timeout: Timeout value for socket operations.
+    :type timeout: int
+    """
+
+    def __init__(self, host: str, port: int, timeout: int):
         super().__init__()
 
         # TCP connection
@@ -94,6 +97,8 @@ class AsyncTCPProtocol(AsyncBaseProtocol):
 
         self.host: str = host
         self.port: int = int(port)
+
+        self.timeout = timeout
 
     async def start(self):
         """
@@ -110,7 +115,7 @@ class AsyncTCPProtocol(AsyncBaseProtocol):
 
     async def stop(self):
         """
-        Stopping the connection to the TCP server.
+        Stops the connection to the TCP server.
         """
 
         # Closing connection
@@ -180,68 +185,99 @@ class AsyncTCPProtocol(AsyncBaseProtocol):
             pass
 
 
-class AwaitableDatagramProtocol(asyncio.Protocol):
-    def __init__(self):
-        self.queue = asyncio.Queue()
-        self.shutdown = asyncio.Event()
-
-    def connection_made(self, transport):
-        self.transport = transport
-
-    def datagram_received(self, data, addr):
-        # Put received data into the queue
-        self.queue.put_nowait((data, addr))
-
-    def connection_lost(self, exc):
-        # The socket has been closed
-        self.shutdown.set()
-
-    async def read_datagram(self, timeout: int | None=None):
-        read_queue_task = asyncio.create_task(self.queue.get())
-        shutdown_monitor_task = asyncio.create_task(self.shutdown.wait())
-
-        done, pending = await asyncio.wait_for(asyncio.wait([read_queue_task, shutdown_monitor_task], return_when=asyncio.FIRST_COMPLETED), timeout=timeout)
-
-        for task in pending:
-            task.cancel()
-        await asyncio.gather(*pending, return_exceptions=True)
-
-        if read_queue_task in done:
-            return await read_queue_task
-        else:  # Connection was lost
-            return b"", (None, None)
-
-
 class AsyncUDPProtocol(AsyncBaseProtocol, asyncio.Protocol):
+    """
+    Parent Class for UDP protocol implementations.
 
-    def __init__(self, host, port):
+    :param host: Hostname of UDP server
+    :type host: str
+    :param port: Port number of the UDP server
+    :type port: int
+    :param timeout: Timeout value for socket operations.
+    :type timeout: int
+    """
+
+    class AwaitableDatagramProtocol(asyncio.Protocol):
+        """
+        Helper class for reading UDP datagrams
+        """
+        def __init__(self):
+            self.queue = asyncio.Queue()
+            self.shutdown = asyncio.Event()
+
+        def connection_made(self, transport):
+            self.transport = transport
+
+        def datagram_received(self, data, addr):
+            # Put received data into the queue
+            self.queue.put_nowait((data, addr))
+
+        def connection_lost(self, exc):
+            # The socket has been closed
+            self.shutdown.set()
+
+        async def read_datagram(self, timeout: int) -> Tuple[bytes, Tuple[str, int]]:
+            """
+            Reads a datagram from the queue.
+
+            :param timeout: Value in seconds to wait before timing out
+            :type timeout: int
+
+            :return: Bytes read and address
+            :rtype: Tuple[bytes, Tuple[str, int]]
+            """
+            read_queue_task = asyncio.create_task(self.queue.get())
+            shutdown_monitor_task = asyncio.create_task(self.shutdown.wait())
+
+            done, pending = await asyncio.wait_for(asyncio.wait([read_queue_task, shutdown_monitor_task], return_when=asyncio.FIRST_COMPLETED), timeout=timeout)
+
+            for task in pending:
+                task.cancel()
+            await asyncio.gather(*pending, return_exceptions=True)
+
+            if read_queue_task not in done:
+                raise ProtoConnectionClosed(
+                    "Connection closed by remote host!")
+
+            return await read_queue_task
+
+    def __init__(self, host: str, port: int, timeout: int):
         super().__init__()
 
-        # UDP connection
+        # UDP connection objects
         self.transport: asyncio.DatagramTransport
         self.protocol: asyncio.DatagramProtocol
-        self.queue = asyncio.Queue()
 
         self.host: str = host
         self.port: int = int(port)
 
+        self.timeout = timeout
+
     async def start(self):
+        """
+        Starts the connection to the UDP server.
+        """
+
         await super().start()
 
         loop = asyncio.get_running_loop()
-        self.transport, self.protocol = await loop.create_datagram_endpoint(AwaitableDatagramProtocol, remote_addr=(self.host, self.port))
+        self.transport, self.protocol = await loop.create_datagram_endpoint(AsyncUDPProtocol.AwaitableDatagramProtocol, remote_addr=(self.host, self.port))
 
     async def stop(self):
+        """
+        Stops the connection to the UDP server.
+        """
+
         self.transport.close()
 
         await super().stop()
 
-    async def read_udp(self) -> Tuple[bytes, str]:
+    async def read_udp(self) -> Tuple[bytes, Tuple[str, int]]:
         """
         Reads data over the UDP protocol.
 
         :return: Bytes read and address
-        :rtype: Tuple[bytes, str]
+        :rtype: Tuple[bytes, Tuple[str, int]]
         """
 
         return await self.protocol.read_datagram(self.timeout)
@@ -252,17 +288,13 @@ class AsyncUDPProtocol(AsyncBaseProtocol, asyncio.Protocol):
 
         :param byts: Bytes to write
         :type byts: bytes
-        :param host: Hostanme of remote host
-        :type host: str
-        :param port: Portname of remote host
-        :type port: int
         """
 
         self.transport.sendto(byts)
 
     def __del__(self):
         """
-        Attempts to close the socket:
+        Attempts to close the transport:
         """
 
         try:
@@ -275,7 +307,7 @@ class AsyncUDPProtocol(AsyncBaseProtocol, asyncio.Protocol):
 
 class AsyncRCONProtocol(AsyncTCPProtocol):
     """
-    Protocol implementation for RCON - Uses TCP sockets.
+    Async protocol implementation for RCON - Uses TCP sockets.
 
     :param host: Hostname of RCON server
     :type host: str
@@ -283,18 +315,10 @@ class AsyncRCONProtocol(AsyncTCPProtocol):
     :type port: int
     :param timeout: Timeout value for socket operations.
     :type timeout: int
-
-    .. versionchanged:: 1.3.0
-
-    Moved packet types to RCONPacket
     """
 
     def __init__(self, host: str, port: int, timeout: int):
-        super().__init__(host, port)
-
-        # Finally, set the timeout:
-
-        self.set_timeout(timeout)
+        super().__init__(host, port, timeout)
 
     def start(self):
         """
@@ -319,10 +343,6 @@ class AsyncRCONProtocol(AsyncTCPProtocol):
         :type pack: RCONPacket
         :param length_check: Boolean determining if we should check packet length
         :type length_check: bool
-
-        .. versionadded:: 1.1.2
-
-        The 'length_check' parameter
         """
 
         # Getting encoded packet data:
@@ -370,7 +390,7 @@ class AsyncRCONProtocol(AsyncTCPProtocol):
 
 class AsyncQUERYProtocol(AsyncUDPProtocol):
     """
-    Protocol implementation for Query - Uses UDP sockets.
+    Async protocol implementation for Query - Uses UDP sockets.
 
     :param host: The hostname of the Query server.
     :type host: str
@@ -424,7 +444,7 @@ class AsyncQUERYProtocol(AsyncUDPProtocol):
 
 class AsyncPINGProtocol(AsyncTCPProtocol):
     """
-    Protocol implementation for server list ping - uses TCP sockets.
+    Async protocol implementation for server list ping - uses TCP sockets.
 
     :param host: Hostname of the Minecraft server
     :type host: str
