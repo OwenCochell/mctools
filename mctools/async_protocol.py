@@ -401,7 +401,7 @@ class AsyncQUERYProtocol(AsyncUDPProtocol):
     """
 
     def __init__(self, host: str, port: int, timeout: int):
-        super().__init__(host, port)
+        super().__init__(host, port, timeout)
 
         # Finally, set the timeout:
 
@@ -457,7 +457,7 @@ class AsyncPINGProtocol(AsyncTCPProtocol):
     def __init__(self, host: str, port: int, timeout: int):
 
         # Init super class
-        super().__init__(host, port)
+        super().__init__(host, port, timeout)
 
         # Finally, set the timeout:
 
