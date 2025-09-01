@@ -105,13 +105,13 @@ class AsyncTCPProtocol(AsyncBaseProtocol):
         Starts the connection to the TCP server.
         """
 
+        # Create the connection:
+
+        self.reader, self.writer = await asyncio.wait_for(asyncio.open_connection(self.host, self.port), self.timeout)
+
         # Preform generic start operations:
 
         await super().start()
-
-        # Create the connection:
-
-        self.reader, self.writer = await asyncio.open_connection(self.host, self.port)
 
     async def stop(self):
         """
@@ -120,8 +120,9 @@ class AsyncTCPProtocol(AsyncBaseProtocol):
 
         # Closing connection
 
-        self.writer.close()
-        await self.writer.wait_closed()
+        if self.connected:
+            self.writer.close()
+            await self.writer.wait_closed()
 
         # Preform generic stop tasks:
 
@@ -215,6 +216,13 @@ class AsyncUDPProtocol(AsyncBaseProtocol, asyncio.Protocol):
         def connection_lost(self, exc):
             # The socket has been closed
             self.shutdown.set()
+            if exc is not None:
+                raise exc
+
+        def error_received(self, exc):
+            self.shutdown.set()
+            if exc is not None:
+                raise exc
 
         async def read_datagram(self, timeout: int) -> Tuple[bytes, Tuple[str, int]]:
             """
@@ -258,17 +266,18 @@ class AsyncUDPProtocol(AsyncBaseProtocol, asyncio.Protocol):
         Starts the connection to the UDP server.
         """
 
-        await super().start()
-
         loop = asyncio.get_running_loop()
         self.transport, self.protocol = await loop.create_datagram_endpoint(AsyncUDPProtocol.AwaitableDatagramProtocol, remote_addr=(self.host, self.port))
+
+        await super().start()
 
     async def stop(self):
         """
         Stops the connection to the UDP server.
         """
 
-        self.transport.close()
+        if self.connected:
+            self.transport.close()
 
         await super().stop()
 
@@ -319,21 +328,6 @@ class AsyncRCONProtocol(AsyncTCPProtocol):
 
     def __init__(self, host: str, port: int, timeout: int):
         super().__init__(host, port, timeout)
-
-    def start(self):
-        """
-        Starts the connection to the RCON server.
-        """
-
-        if self.connected:
-
-            # Already started
-
-            return
-
-        # Preform generic start operations:
-
-        super().start()
 
     async def send(self, pack: RCONPacket, length_check: bool = False):
         """
