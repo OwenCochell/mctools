@@ -1,8 +1,23 @@
 # Changelog
 
+## 1.4.1
+
+This release adds some minor fixes to the async clients
+
+Once again, special thanks to [ciherrera20](https://github.com/ciherrera20) for these fixes!
+
+### Bug Fixes
+
+- Added better error handling in protocol objects
+- Protocol objects will not close the socket if not connected
+- Added parent method calls and made the order of these calls more consistent
+- Added missing timeout parameter in protocol objects
+
 ## 1.4.0
 
 This release adds async clients that can be utilized in asyncio event loops.
+
+Special thanks to [ciherrera20](https://github.com/ciherrera20) for developing these components!
 
 ### Added
 
